@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { CategoryDto, CategoryQuery, CreateCategoryInput, UpdateCategoryInput } from '@textile-admin/shared';
+import type { CategoryDto, CategoryQuery, CreateCategoryInput, UpdateCategoryInput } from '@swoonrush/shared';
 import { apiClient } from './client';
 
 const KEY = ['categories'] as const;

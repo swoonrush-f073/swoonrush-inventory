@@ -5,7 +5,7 @@ import type {
   ProductImageDto,
   RequestUploadUrlInput,
   UpdateProductImageInput,
-} from '@textile-admin/shared';
+} from '@swoonrush/shared';
 import { randomUUID } from 'node:crypto';
 import { env } from '../config/env.js';
 import { pool, withTransaction } from '../config/db.js';

@@ -1,4 +1,4 @@
-# Textile Commerce Admin
+# Swoonrush Inventory
 
 A lightweight inventory, order, and sales admin system for a small textile
 e-commerce business. One admin dashboard, one REST API, one Postgres
@@ -204,13 +204,13 @@ as a fallback, the backend both read it. `apps/admin` needs its own `.env`
 
 | Variable | Used by | Purpose |
 |---|---|---|
-| `DATABASE_URL` | backend, database scripts | Postgres connection string. Local: the docker-compose Postgres (port `55432`, remapped from 5432 to avoid clashing with other local Postgres instances — adjust in `docker-compose.yml`/`.env` if it collides with something on your machine). Production: your Supabase connection string — prefer the **Transaction mode** pooler (port `6543`) over Session mode even for this long-running Node server if the host can spin down on inactivity (e.g. Render's free tier): a cold-start burst of requests opening several Session-mode connections at once can exhaust Supavisor's pool and produce `ECHECKOUTTIMEOUT` errors. Transaction mode multiplexes connections instead of holding one per client, and works fine here since every multi-statement transaction already goes through `withTransaction`'s single held client. Deploying the backend to Cloudflare Workers requires Transaction mode regardless. |
+| `DATABASE_URL` | backend, database scripts | Postgres connection string. Local: the docker-compose Postgres (port `55433`, remapped from 5432 to avoid clashing with other local Postgres instances — adjust in `docker-compose.yml`/`.env` if it collides with something on your machine). Production: your Supabase connection string — prefer the **Transaction mode** pooler (port `6543`) over Session mode even for this long-running Node server if the host can spin down on inactivity (e.g. Render's free tier): a cold-start burst of requests opening several Session-mode connections at once can exhaust Supavisor's pool and produce `ECHECKOUTTIMEOUT` errors. Transaction mode multiplexes connections instead of holding one per client, and works fine here since every multi-statement transaction already goes through `withTransaction`'s single held client. Deploying the backend to Cloudflare Workers requires Transaction mode regardless. |
 | `PORT` | backend | Port the API listens on. Default `3000`. |
 | `FRONTEND_URL` | backend | Allowed CORS origin for the admin app. Local: `http://localhost:5190`. |
 | `PUBLIC_STOREFRONT_URLS` | backend | Comma-separated origins allowed to call the public storefront API (`GET /api/public/*`). Blank allows any origin. |
 | `SUPABASE_JWT_SECRET` | backend | Verifies the `Authorization: Bearer` JWT on every request. Local: any string (matched by `dev-token.ts`). Production: Supabase Dashboard → Project Settings → API → JWT Settings → JWT Secret. |
 | `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` | backend | Only needed once a real Supabase project is connected; not required for local dev. Never expose the service-role key to the frontend. |
-| `R2_ENDPOINT` | backend | S3-compatible endpoint. Local: MinIO (`http://localhost:59000`). Production: your Cloudflare R2 S3 API endpoint (`https://<account-id>.r2.cloudflarestorage.com`). |
+| `R2_ENDPOINT` | backend | S3-compatible endpoint. Local: MinIO (`http://localhost:59010`). Production: your Cloudflare R2 S3 API endpoint (`https://<account-id>.r2.cloudflarestorage.com`). |
 | `R2_REGION` | backend | `auto` works for both MinIO and R2. |
 | `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` | backend | Local: the MinIO credentials in `docker-compose.yml`. Production: an R2 API token's access/secret key. **Never** put these in `apps/admin`. |
 | `R2_BUCKET_NAME` | backend | Bucket product images are stored in. |
@@ -306,7 +306,7 @@ nothing, never partial.
 
 ```bash
 npm run test --workspace=apps/backend   # Vitest, against a dedicated
-                                         # textile_admin_test database that
+                                         # swoonrush_test database that
                                          # the test setup creates/migrates
                                          # automatically (see tests/setup.ts)
 npm run test --workspace=apps/admin     # Vitest + React Testing Library

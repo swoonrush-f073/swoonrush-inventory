@@ -8,8 +8,8 @@ import type {
   OrderStatus,
   PaymentStatus,
   UpdateOrderInput,
-} from '@textile-admin/shared';
-import { ORDER_STATUS_TRANSITIONS, STOCK_DEDUCTED_STATUSES } from '@textile-admin/shared';
+} from '@swoonrush/shared';
+import { ORDER_STATUS_TRANSITIONS, STOCK_DEDUCTED_STATUSES } from '@swoonrush/shared';
 import { paginatedResult, type PaginatedResult } from './helpers/paginatedResult.js';
 import { pool, withTransaction, type Queryable } from '../config/db.js';
 import { customerRepository } from '../repositories/customerRepository.js';

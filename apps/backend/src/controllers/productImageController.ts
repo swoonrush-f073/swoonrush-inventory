@@ -3,7 +3,7 @@ import {
   addProductImageSchema,
   requestUploadUrlSchema,
   updateProductImageSchema,
-} from '@textile-admin/shared';
+} from '@swoonrush/shared';
 import { productImageService } from '../services/productImageService.js';
 import { pathParam } from '../utils/params.js';
 import { ok } from '../utils/response.js';

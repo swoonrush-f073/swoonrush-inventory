@@ -1,5 +1,5 @@
-import type { ExcelImportError, ExcelImportPreviewRow, ExcelImportResult, ProductStatus } from '@textile-admin/shared';
-import { PRODUCT_STATUSES } from '@textile-admin/shared';
+import type { ExcelImportError, ExcelImportPreviewRow, ExcelImportResult, ProductStatus } from '@swoonrush/shared';
+import { PRODUCT_STATUSES } from '@swoonrush/shared';
 import { pool, withTransaction } from '../../config/db.js';
 import { categoryRepository } from '../../repositories/categoryRepository.js';
 import { inventoryMovementRepository } from '../../repositories/inventoryMovementRepository.js';

@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { History } from 'lucide-react';
-import type { MovementType } from '@textile-admin/shared';
-import { MOVEMENT_TYPES } from '@textile-admin/shared';
+import type { MovementType } from '@swoonrush/shared';
+import { MOVEMENT_TYPES } from '@swoonrush/shared';
 import { PageHeader } from '@/components/PageHeader';
 import { EmptyState } from '@/components/EmptyState';
 import { ErrorState } from '@/components/ErrorState';

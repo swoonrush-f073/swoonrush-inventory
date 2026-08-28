@@ -5,7 +5,7 @@ import type {
   CustomerWithStatsDto,
   PaginatedResult,
   UpdateCustomerInput,
-} from '@textile-admin/shared';
+} from '@swoonrush/shared';
 import { apiClient } from './client';
 
 const KEY = ['customers'] as const;

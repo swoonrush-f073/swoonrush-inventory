@@ -9,7 +9,7 @@ import type {
   RequestUploadUrlInput,
   UpdateProductImageInput,
   UpdateProductInput,
-} from '@textile-admin/shared';
+} from '@swoonrush/shared';
 import { apiClient } from './client';
 
 const KEY = ['products'] as const;

@@ -1,35 +1,35 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: textile-admin-postgres
+    container_name: swoonrush-inventory-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: textile
-      POSTGRES_PASSWORD: textile
-      POSTGRES_DB: textile_admin
+      POSTGRES_USER: swoonrush
+      POSTGRES_PASSWORD: swoonrush
+      POSTGRES_DB: swoonrush
     ports:
-      - '55432:5432'
+      - '55433:5432'
     volumes:
-      - textile_postgres_data:/var/lib/postgresql/data
+      - swoonrush_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U textile -d textile_admin']
+      test: ['CMD-SHELL', 'pg_isready -U swoonrush -d swoonrush']
       interval: 5s
       timeout: 5s
       retries: 10
 
   minio:
     image: minio/minio:latest
-    container_name: textile-admin-minio
+    container_name: swoonrush-inventory-minio
     restart: unless-stopped
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: textile-minio
-      MINIO_ROOT_PASSWORD: textile-minio-secret
+      MINIO_ROOT_USER: swoonrush-minio
+      MINIO_ROOT_PASSWORD: swoonrush-minio-secret
     ports:
-      - '59000:9000' # S3 API
-      - '59001:9001' # Web console
+      - '59010:9000' # S3 API
+      - '59011:9001' # Web console
     volumes:
-      - textile_minio_data:/data
+      - swoonrush_minio_data:/data
     healthcheck:
       test: ['CMD', 'mc', 'ready', 'local']
       interval: 5s
@@ -43,12 +43,12 @@ services:
       - minio
     entrypoint: >
       /bin/sh -c "
-      until mc alias set local http://minio:9000 textile-minio textile-minio-secret; do sleep 1; done;
+      until mc alias set local http://minio:9000 swoonrush-minio swoonrush-minio-secret; do sleep 1; done;
       mc mb --ignore-existing local/product-images;
       mc anonymous set download local/product-images;
       exit 0;
       "
 
 volumes:
-  textile_postgres_data:
-  textile_minio_data:
+  swoonrush_postgres_data:
+  swoonrush_minio_data:

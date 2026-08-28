@@ -17,7 +17,7 @@ import { useCategories } from '@/api/categories';
 import { useDeleteProduct, useProducts } from '@/api/products';
 import { useExportExcel } from '@/api/excel';
 import { formatCurrency } from '@/lib/utils';
-import type { ProductDetailDto } from '@textile-admin/shared';
+import type { ProductDetailDto } from '@swoonrush/shared';
 
 const ALL = '__all__';
 

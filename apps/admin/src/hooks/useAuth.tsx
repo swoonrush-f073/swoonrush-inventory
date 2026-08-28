@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import type { UserDto } from '@textile-admin/shared';
+import type { UserDto } from '@swoonrush/shared';
 import { apiClient, clearToken, getToken, setToken, setUnauthorizedHandler } from '@/api/client';
 import { supabase } from '@/lib/supabase';
 

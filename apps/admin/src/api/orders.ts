@@ -8,7 +8,7 @@ import type {
   PaginatedResult,
   PaymentStatus,
   UpdateOrderInput,
-} from '@textile-admin/shared';
+} from '@swoonrush/shared';
 import { apiClient } from './client';
 
 const KEY = ['orders'] as const;

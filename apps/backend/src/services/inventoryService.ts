@@ -6,7 +6,7 @@ import type {
   ProductDetailDto,
   StockAdjustInput,
   StockInInput,
-} from '@textile-admin/shared';
+} from '@swoonrush/shared';
 import { paginatedResult, type PaginatedResult } from './helpers/paginatedResult.js';
 import { pool, withTransaction } from '../config/db.js';
 import { inventoryMovementRepository } from '../repositories/inventoryMovementRepository.js';

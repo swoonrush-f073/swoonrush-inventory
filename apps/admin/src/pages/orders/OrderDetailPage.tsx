@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { ORDER_STATUS_TRANSITIONS, type OrderStatus, type PaymentStatus } from '@textile-admin/shared';
+import { ORDER_STATUS_TRANSITIONS, type OrderStatus, type PaymentStatus } from '@swoonrush/shared';
 import { PageHeader } from '@/components/PageHeader';
 import { ErrorState } from '@/components/ErrorState';
 import { ConfirmDialog } from '@/components/ConfirmDialog';

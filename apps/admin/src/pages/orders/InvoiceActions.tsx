@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { toast } from 'sonner';
 import { Download, Loader2, Printer } from 'lucide-react';
-import type { OrderDetailDto } from '@textile-admin/shared';
+import type { OrderDetailDto } from '@swoonrush/shared';
 import { Button } from '@/components/ui/button';
 import { fetchOrder } from '@/api/orders';
 import { downloadInvoicePdf, printInvoicePdf } from '@/lib/invoice';

@@ -1,4 +1,4 @@
-import type { ExcelImportError, ExcelImportPreviewRow, ExcelImportResult } from '@textile-admin/shared';
+import type { ExcelImportError, ExcelImportPreviewRow, ExcelImportResult } from '@swoonrush/shared';
 import { pool, withTransaction } from '../../config/db.js';
 import { inventoryMovementRepository } from '../../repositories/inventoryMovementRepository.js';
 import { productRepository } from '../../repositories/productRepository.js';

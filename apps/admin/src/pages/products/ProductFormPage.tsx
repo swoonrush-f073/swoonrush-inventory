@@ -8,7 +8,7 @@ import {
   updateProductSchema,
   type CreateProductInput,
   type UpdateProductInput,
-} from '@textile-admin/shared';
+} from '@swoonrush/shared';
 import { PageHeader } from '@/components/PageHeader';
 import { ErrorState } from '@/components/ErrorState';
 import { Button } from '@/components/ui/button';

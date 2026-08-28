@@ -1,6 +1,6 @@
 import type { MiddlewareHandler } from 'hono';
 import * as jose from 'jose';
-import type { UserRole } from '@textile-admin/shared';
+import type { UserRole } from '@swoonrush/shared';
 import { env } from '../config/env.js';
 import { pool } from '../config/db.js';
 import { userRepository } from '../repositories/userRepository.js';

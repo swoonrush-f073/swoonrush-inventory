@@ -1,6 +1,6 @@
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import type { OrderDetailDto } from '@textile-admin/shared';
+import type { OrderDetailDto } from '@swoonrush/shared';
 import { formatDate } from './utils';
 
 // jsPDF's built-in fonts (Helvetica etc.) only cover the old WinAnsi/Latin-1
@@ -15,7 +15,7 @@ function formatCurrencyForPdf(amount: number): string {
 
 // There's no per-business settings screen yet, so these are the one place
 // to edit if the shop's name/tagline/GST status ever changes.
-const BUSINESS_NAME = 'DZANE';
+const BUSINESS_NAME = 'SWOONRUSH';
 const BUSINESS_TAGLINE = 'Stitching Studio & Premium Ladies Wear';
 const BUSINESS_MOTTO = 'Tailored Grace, Timeless Fit';
 const GST_NOTE = 'GST not charged — supplier not registered under GST';

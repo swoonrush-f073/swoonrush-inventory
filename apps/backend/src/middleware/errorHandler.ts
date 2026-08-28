@@ -1,6 +1,6 @@
 import type { ErrorHandler } from 'hono';
 import { ZodError } from 'zod';
-import type { ApiError as ApiErrorBody } from '@textile-admin/shared';
+import type { ApiError as ApiErrorBody } from '@swoonrush/shared';
 import { ApiError } from '../utils/apiError.js';
 
 function fieldsFromZodError(err: ZodError): Record<string, string> {

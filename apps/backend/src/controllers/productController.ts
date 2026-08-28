@@ -1,5 +1,5 @@
 import type { Context } from 'hono';
-import { createProductSchema, productQuerySchema, updateProductSchema } from '@textile-admin/shared';
+import { createProductSchema, productQuerySchema, updateProductSchema } from '@swoonrush/shared';
 import { productService } from '../services/productService.js';
 import { pathParam } from '../utils/params.js';
 import { ok } from '../utils/response.js';

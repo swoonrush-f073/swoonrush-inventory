@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { createCategorySchema, type CategoryDto, type CreateCategoryInput } from '@textile-admin/shared';
+import { createCategorySchema, type CategoryDto, type CreateCategoryInput } from '@swoonrush/shared';
 import { Pencil, Plus, Tags, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { PageHeader } from '@/components/PageHeader';

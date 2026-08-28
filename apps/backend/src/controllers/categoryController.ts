@@ -3,7 +3,7 @@ import {
   categoryQuerySchema,
   createCategorySchema,
   updateCategorySchema,
-} from '@textile-admin/shared';
+} from '@swoonrush/shared';
 import { categoryService } from '../services/categoryService.js';
 import { pathParam } from '../utils/params.js';
 import { ok } from '../utils/response.js';

@@ -8,7 +8,7 @@ import type {
   ProductDetailDto,
   StockAdjustInput,
   StockInInput,
-} from '@textile-admin/shared';
+} from '@swoonrush/shared';
 import { apiClient } from './client';
 
 export function useInventory(query: Partial<InventoryQuery> = {}) {

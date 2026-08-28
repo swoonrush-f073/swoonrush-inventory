@@ -3,7 +3,7 @@ import type {
   CustomerQuery,
   CustomerWithStatsDto,
   UpdateCustomerInput,
-} from '@textile-admin/shared';
+} from '@swoonrush/shared';
 import { paginatedResult, type PaginatedResult } from './helpers/paginatedResult.js';
 import { pool } from '../config/db.js';
 import { customerRepository } from '../repositories/customerRepository.js';

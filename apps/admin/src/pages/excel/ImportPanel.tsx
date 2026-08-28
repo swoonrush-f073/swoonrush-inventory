@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { toast } from 'sonner';
-import type { ExcelImportResult } from '@textile-admin/shared';
+import type { ExcelImportResult } from '@swoonrush/shared';
 import type { UseMutationResult } from '@tanstack/react-query';
 import { AlertCircle, CheckCircle2, FileSpreadsheet, UploadCloud } from 'lucide-react';
 import { Button } from '@/components/ui/button';

@@ -1,5 +1,5 @@
 {
-  "name": "@textile-admin/backend",
+  "name": "@swoonrush/backend",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -15,7 +15,7 @@
     "@aws-sdk/client-s3": "^3.620.0",
     "@aws-sdk/s3-request-presigner": "^3.620.0",
     "@hono/node-server": "^1.12.0",
-    "@textile-admin/shared": "*",
+    "@swoonrush/shared": "*",
     "dotenv": "^16.4.5",
     "exceljs": "^4.4.0",
     "hono": "^4.5.5",

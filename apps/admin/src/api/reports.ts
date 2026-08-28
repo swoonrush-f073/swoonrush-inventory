@@ -5,7 +5,7 @@ import type {
   InventoryReportDto,
   ProfitReportDto,
   SalesReportDto,
-} from '@textile-admin/shared';
+} from '@swoonrush/shared';
 import { apiClient } from './client';
 
 export function useDashboard(range: Partial<DateRangeQuery> = {}) {

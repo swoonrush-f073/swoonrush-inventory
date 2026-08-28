@@ -5,7 +5,7 @@ import type {
   ProfitReportDto,
   ProductsReportDto,
   SalesReportDto,
-} from '@textile-admin/shared';
+} from '@swoonrush/shared';
 import { pool } from '../config/db.js';
 import { expenseRepository } from '../repositories/expenseRepository.js';
 import { productRepository } from '../repositories/productRepository.js';

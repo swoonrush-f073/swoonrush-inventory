@@ -1,4 +1,4 @@
-import type { CreateExpenseInput, ExpenseDto, ExpenseQuery, UpdateExpenseInput } from '@textile-admin/shared';
+import type { CreateExpenseInput, ExpenseDto, ExpenseQuery, UpdateExpenseInput } from '@swoonrush/shared';
 import { paginatedResult, type PaginatedResult } from './helpers/paginatedResult.js';
 import { pool } from '../config/db.js';
 import { expenseRepository } from '../repositories/expenseRepository.js';

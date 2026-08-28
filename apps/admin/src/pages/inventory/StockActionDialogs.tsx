@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { toast } from 'sonner';
-import type { InventoryListItemDto } from '@textile-admin/shared';
+import type { InventoryListItemDto } from '@swoonrush/shared';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';

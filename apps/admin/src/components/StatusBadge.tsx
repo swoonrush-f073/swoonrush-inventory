@@ -1,5 +1,5 @@
-import type { OrderStatus, PaymentStatus, ProductStatus } from '@textile-admin/shared';
-import type { StockStatus } from '@textile-admin/shared';
+import type { OrderStatus, PaymentStatus, ProductStatus } from '@swoonrush/shared';
+import type { StockStatus } from '@swoonrush/shared';
 import { Badge, type BadgeProps } from '@/components/ui/badge';
 
 const ORDER_STATUS_VARIANT: Record<OrderStatus, BadgeProps['variant']> = {

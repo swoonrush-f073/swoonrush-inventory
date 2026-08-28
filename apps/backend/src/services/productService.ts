@@ -4,9 +4,9 @@ import type {
   ProductListItemDto,
   ProductQuery,
   UpdateProductInput,
-} from '@textile-admin/shared';
+} from '@swoonrush/shared';
 import type { PoolClient } from 'pg';
-import type { ProductRow } from '@textile-admin/shared';
+import type { ProductRow } from '@swoonrush/shared';
 import { paginatedResult, type PaginatedResult } from './helpers/paginatedResult.js';
 import { pool, withTransaction } from '../config/db.js';
 import { categoryRepository } from '../repositories/categoryRepository.js';

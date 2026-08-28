@@ -1,5 +1,5 @@
 import { Check } from 'lucide-react';
-import type { OrderStatus } from '@textile-admin/shared';
+import type { OrderStatus } from '@swoonrush/shared';
 import { cn } from '@/lib/utils';
 
 const HAPPY_PATH: OrderStatus[] = ['PENDING', 'CONFIRMED', 'PACKED', 'SHIPPED', 'DELIVERED'];

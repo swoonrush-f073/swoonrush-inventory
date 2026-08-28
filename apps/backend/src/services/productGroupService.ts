@@ -4,7 +4,7 @@ import type {
   ProductGroupDetailDto,
   ProductGroupDto,
   UpdateProductGroupInput,
-} from '@textile-admin/shared';
+} from '@swoonrush/shared';
 import { paginatedResult, type PaginatedResult } from './helpers/paginatedResult.js';
 import { pool, withTransaction } from '../config/db.js';
 import { productGroupRepository } from '../repositories/productGroupRepository.js';

@@ -1,4 +1,4 @@
-import type { UserRow } from '@textile-admin/shared';
+import type { UserRow } from '@swoonrush/shared';
 import type { Queryable } from '../config/db.js';
 
 export const userRepository = {

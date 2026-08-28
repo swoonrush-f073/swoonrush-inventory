@@ -1,4 +1,4 @@
-import type { UserRow } from '@textile-admin/shared';
+import type { UserRow } from '@swoonrush/shared';
 
 export interface AppEnv {
   Variables: {

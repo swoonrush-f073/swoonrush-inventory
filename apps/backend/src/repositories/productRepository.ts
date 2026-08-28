@@ -1,4 +1,4 @@
-import type { ProductRow } from '@textile-admin/shared';
+import type { ProductRow } from '@swoonrush/shared';
 import type { Queryable } from '../config/db.js';
 import { offsetFor } from '../utils/pagination.js';
 

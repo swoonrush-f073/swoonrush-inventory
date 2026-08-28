@@ -3,7 +3,7 @@ import type {
   PublicProductDetailDto,
   PublicProductDto,
   PublicProductQuery,
-} from '@textile-admin/shared';
+} from '@swoonrush/shared';
 import { paginatedResult } from './helpers/paginatedResult.js';
 import { pool } from '../config/db.js';
 import { categoryRepository } from '../repositories/categoryRepository.js';

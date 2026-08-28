@@ -1,4 +1,4 @@
-import type { PaginationMeta } from '@textile-admin/shared';
+import type { PaginationMeta } from '@swoonrush/shared';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';

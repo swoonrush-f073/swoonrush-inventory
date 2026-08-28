@@ -1,5 +1,5 @@
 import type { Context } from 'hono';
-import { createExpenseSchema, expenseQuerySchema, updateExpenseSchema } from '@textile-admin/shared';
+import { createExpenseSchema, expenseQuerySchema, updateExpenseSchema } from '@swoonrush/shared';
 import { expenseService } from '../services/expenseService.js';
 import { pathParam } from '../utils/params.js';
 import { ok } from '../utils/response.js';

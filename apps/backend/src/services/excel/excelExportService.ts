@@ -1,5 +1,5 @@
 import ExcelJS from 'exceljs';
-import type { DateRangeQuery } from '@textile-admin/shared';
+import type { DateRangeQuery } from '@swoonrush/shared';
 import { pool } from '../../config/db.js';
 import { orderRepository } from '../../repositories/orderRepository.js';
 import { productRepository } from '../../repositories/productRepository.js';

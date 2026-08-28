@@ -2,7 +2,7 @@ import * as React from 'react';
 import { toast } from 'sonner';
 import imageCompression from 'browser-image-compression';
 import { GripVertical, ImagePlus, Star, Trash2, UploadCloud } from 'lucide-react';
-import type { ProductImageDto } from '@textile-admin/shared';
+import type { ProductImageDto } from '@swoonrush/shared';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import {

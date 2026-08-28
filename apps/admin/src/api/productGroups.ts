@@ -7,7 +7,7 @@ import type {
   ProductGroupDto,
   ProductGroupQuery,
   UpdateProductGroupInput,
-} from '@textile-admin/shared';
+} from '@swoonrush/shared';
 import { apiClient } from './client';
 
 const KEY = ['productGroups'] as const;

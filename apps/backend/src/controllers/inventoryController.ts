@@ -5,7 +5,7 @@ import {
   paginationQuerySchema,
   stockAdjustSchema,
   stockInSchema,
-} from '@textile-admin/shared';
+} from '@swoonrush/shared';
 import { inventoryService } from '../services/inventoryService.js';
 import { ok } from '../utils/response.js';
 import type { AppEnv } from '../types/hono.js';

@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { createOrderSchema, type CreateOrderInput } from '@textile-admin/shared';
+import { createOrderSchema, type CreateOrderInput } from '@swoonrush/shared';
 import { Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

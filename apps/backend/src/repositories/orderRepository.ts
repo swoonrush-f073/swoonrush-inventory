@@ -1,4 +1,4 @@
-import type { OrderItemRow, OrderRow, OrderStatus, PaymentStatus } from '@textile-admin/shared';
+import type { OrderItemRow, OrderRow, OrderStatus, PaymentStatus } from '@swoonrush/shared';
 import type { Queryable } from '../config/db.js';
 import { offsetFor } from '../utils/pagination.js';
 

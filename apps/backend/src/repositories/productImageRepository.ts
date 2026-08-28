@@ -1,4 +1,4 @@
-import type { ProductImageRow } from '@textile-admin/shared';
+import type { ProductImageRow } from '@swoonrush/shared';
 import type { Queryable } from '../config/db.js';
 
 export const productImageRepository = {

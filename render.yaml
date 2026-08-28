@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: textile-admin-backend
+    name: swoonrush-backend
     runtime: node
     plan: free
     buildCommand: npm install && npm run build --workspace=packages/shared && npm run build --workspace=apps/backend
@@ -15,7 +15,7 @@ services:
       - key: FRONTEND_URL
         sync: false
       - key: PUBLIC_STOREFRONT_URLS
-        value: https://dzane.in
+        value: https://swoonrush.store
       - key: SUPABASE_JWT_SECRET
         sync: false
       - key: SUPABASE_URL

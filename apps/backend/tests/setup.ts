@@ -7,7 +7,7 @@ import { afterAll, afterEach, beforeAll } from 'vitest';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const TEST_DATABASE_URL =
-  process.env.TEST_DATABASE_URL ?? 'postgresql://textile:textile@localhost:55432/textile_admin_test';
+  process.env.TEST_DATABASE_URL ?? 'postgresql://swoonrush:swoonrush@localhost:55433/swoonrush_test';
 
 // Every repository/service under test reads `pool` from `../src/config/db.js`,
 // which builds its connection string from `env.DATABASE_URL` at import time.

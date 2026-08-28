@@ -1,4 +1,4 @@
-import type { CategoryRow } from '@textile-admin/shared';
+import type { CategoryRow } from '@swoonrush/shared';
 import type { Queryable } from '../config/db.js';
 
 export interface CategoryFilters {

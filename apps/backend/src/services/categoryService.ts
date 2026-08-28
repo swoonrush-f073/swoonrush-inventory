@@ -1,4 +1,4 @@
-import type { CategoryDto, CategoryQuery, CreateCategoryInput, UpdateCategoryInput } from '@textile-admin/shared';
+import type { CategoryDto, CategoryQuery, CreateCategoryInput, UpdateCategoryInput } from '@swoonrush/shared';
 import { pool } from '../config/db.js';
 import { categoryRepository } from '../repositories/categoryRepository.js';
 import { ApiError } from '../utils/apiError.js';

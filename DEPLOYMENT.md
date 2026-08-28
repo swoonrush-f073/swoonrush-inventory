@@ -1,6 +1,6 @@
 # Deployment guide
 
-This is the operational runbook for deploying and running Textile Admin in
+This is the operational runbook for deploying and running Swoonrush Inventory in
 production — what's actually live today, how to redeploy or rebuild it from
 scratch, and the gotchas that aren't obvious until you hit them. For a
 conceptual walkthrough of the stack and local dev setup, see `README.md`.
@@ -14,11 +14,12 @@ conceptual walkthrough of the stack and local dev setup, see `README.md`.
 └─────────────────┘        └───────────┬───────────┘        └─────────────────┘
                                         │ S3 API
                                         ▼
-                            ┌──────────────────────┐        ┌─────────────────┐
-                            │  Cloudflare R2        │        │  Public storefront│
-                            │  (product images)     │        │  dzane.in — calls │
-                            └──────────────────────┘        │  GET /api/public/* │
-                                                             └─────────────────┘
+                            ┌──────────────────────┐        ┌───────────────────────┐
+                            │  Cloudflare R2        │        │  Public storefront    │
+                            │  (product images)     │        │  swoonrush.store —    │
+                            └──────────────────────┘        │  calls GET            │
+                                                             │  /api/public/*        │
+                                                             └───────────────────────┘
 ```
 
 Four independent services, each redeployed/managed separately:
@@ -34,10 +35,10 @@ Four independent services, each redeployed/managed separately:
 
 | Thing | Value |
 |---|---|
-| GitHub repo | `github.com/peakpoint2037/Textile-admin` (branch `main`, auto-deploys both Vercel and Render on push) |
-| Admin frontend | `https://textile-admin-dzane.vercel.app` (Vercel project `textile-admin`, team `dzane`) |
-| Backend API | `https://textile-admin-backend-1tre.onrender.com` (Render service `textile-admin-backend`) |
-| Public storefront (consumer, not this repo) | `https://dzane.in` — calls `GET /api/public/products[/:id]`, CORS-allowed via `PUBLIC_STOREFRONT_URLS` |
+| GitHub repo | `github.com/swoonrush-f073/swoonrush-inventory` (branch `main`, auto-deploys both Vercel and Render on push) |
+| Admin frontend | `https://swoonrush-inventory.vercel.app` (Vercel project `swoonrush-inventory`, team `swoonrush`) |
+| Backend API | `https://swoonrush-backend.onrender.com` (Render service `swoonrush-backend`) |
+| Public storefront (consumer, not this repo) | `https://swoonrush.store` — calls `GET /api/public/products[/:id]`, CORS-allowed via `PUBLIC_STOREFRONT_URLS` |
 | Supabase project | ref `cpjcfwsemuspoqrrbjcw`, region `ap-northeast-2` |
 | Config as code | `render.yaml` (backend Blueprint), `vercel.json` (frontend build/rewrites) |
 
@@ -53,7 +54,7 @@ Full reference lives in `.env.example` at the repo root — copy it to `.env`
 `apps/admin/.env` for local dev. In production, set these directly on each
 host:
 
-**Render** (`textile-admin-backend`, Dashboard → Environment):
+**Render** (`swoonrush-backend`, Dashboard → Environment):
 `DATABASE_URL`, `FRONTEND_URL`, `PUBLIC_STOREFRONT_URLS`, `SUPABASE_JWT_SECRET`,
 `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `R2_ENDPOINT`,
 `R2_REGION`, `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`,
@@ -61,7 +62,7 @@ host:
 and `R2_REGION` is `sync: false` in `render.yaml`, meaning Render won't
 overwrite them from the Blueprint — they're set once by hand in the dashboard.
 
-**Vercel** (`textile-admin` project, Settings → Environment Variables):
+**Vercel** (`swoonrush-inventory` project, Settings → Environment Variables):
 `VITE_API_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`. Must use
 `--no-sensitive` visibility if setting via CLI (`vercel env add`) — Vercel
 rejects "secret" visibility for `VITE_`-prefixed vars since they're bundled
@@ -137,7 +138,7 @@ assuming the secret is wrong.
    ```json
    [
      {
-       "AllowedOrigins": ["https://textile-admin-dzane.vercel.app"],
+       "AllowedOrigins": ["https://swoonrush-inventory.vercel.app"],
        "AllowedMethods": ["GET", "PUT"],
        "AllowedHeaders": ["*"]
      }
@@ -181,7 +182,7 @@ applied — verify it:**
 ```bash
 # Cheap check: does the route respond with something other than a 401
 # (route exists) and, ideally, hit an endpoint that doesn't need auth:
-curl -s https://textile-admin-backend-1tre.onrender.com/api/public/products?limit=1
+curl -s https://swoonrush-backend.onrender.com/api/public/products?limit=1
 # A 500 here (not 401/200) is the signature of an unapplied migration.
 ```
 

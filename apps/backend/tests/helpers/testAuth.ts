@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import jwt from 'jsonwebtoken';
-import type { UserRole } from '@textile-admin/shared';
+import type { UserRole } from '@swoonrush/shared';
 import { pool } from '../../src/config/db.js';
 import { env } from '../../src/config/env.js';
 

@@ -1,8 +1,8 @@
-import type { ApiResponse } from '@textile-admin/shared';
+import type { ApiResponse } from '@swoonrush/shared';
 import { supabase } from '@/lib/supabase';
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api';
-const TOKEN_STORAGE_KEY = 'textile_admin_token';
+const TOKEN_STORAGE_KEY = 'swoonrush_token';
 const REQUEST_TIMEOUT_MS = 15000;
 
 export class ApiClientError extends Error {

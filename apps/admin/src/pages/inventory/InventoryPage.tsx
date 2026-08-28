@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
 import { Boxes, History, Search } from 'lucide-react';
-import type { InventoryListItemDto } from '@textile-admin/shared';
+import type { InventoryListItemDto } from '@swoonrush/shared';
 import { PageHeader } from '@/components/PageHeader';
 import { EmptyState } from '@/components/EmptyState';
 import { ErrorState } from '@/components/ErrorState';

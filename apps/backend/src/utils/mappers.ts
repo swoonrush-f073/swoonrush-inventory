@@ -20,7 +20,7 @@ import type {
   StockStatus,
   UserDto,
   UserRow,
-} from '@textile-admin/shared';
+} from '@swoonrush/shared';
 import type {
   CustomerRow as CustomerRowType,
   OrderDetailDto,
@@ -28,12 +28,12 @@ import type {
   OrderItemRow,
   OrderListItemDto,
   OrderRow,
-} from '@textile-admin/shared';
+} from '@swoonrush/shared';
 import type { ProductListRow } from '../repositories/productRepository.js';
 import type { ProductGroupListRow } from '../repositories/productGroupRepository.js';
 import type { MovementListRow } from '../repositories/inventoryMovementRepository.js';
 import type { OrderListRow } from '../repositories/orderRepository.js';
-import type { InventoryMovementDto } from '@textile-admin/shared';
+import type { InventoryMovementDto } from '@swoonrush/shared';
 
 export function stockStatusFor(stockQuantity: number, lowStockLimit: number): StockStatus {
   if (stockQuantity <= 0) return 'OUT_OF_STOCK';

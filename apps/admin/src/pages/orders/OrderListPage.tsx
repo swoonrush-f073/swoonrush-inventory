@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, Search } from 'lucide-react';
-import type { OrderQuery } from '@textile-admin/shared';
+import type { OrderQuery } from '@swoonrush/shared';
 import { PageHeader } from '@/components/PageHeader';
 import { EmptyState } from '@/components/EmptyState';
 import { ErrorState } from '@/components/ErrorState';

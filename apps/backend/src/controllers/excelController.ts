@@ -1,5 +1,5 @@
 import type { Context } from 'hono';
-import { dateRangeQuerySchema } from '@textile-admin/shared';
+import { dateRangeQuerySchema } from '@swoonrush/shared';
 import { productExcelImportService } from '../services/excel/productExcelImportService.js';
 import { stockExcelImportService } from '../services/excel/stockExcelImportService.js';
 import { excelExportService } from '../services/excel/excelExportService.js';

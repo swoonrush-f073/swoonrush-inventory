@@ -1,5 +1,5 @@
 import type { Context } from 'hono';
-import { dateRangeQuerySchema } from '@textile-admin/shared';
+import { dateRangeQuerySchema } from '@swoonrush/shared';
 import { reportService } from '../services/reportService.js';
 import { ok } from '../utils/response.js';
 import type { AppEnv } from '../types/hono.js';

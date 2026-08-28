@@ -8,7 +8,7 @@ import {
   type CreateExpenseInput,
   type ExpenseCategory,
   type ExpenseDto,
-} from '@textile-admin/shared';
+} from '@swoonrush/shared';
 import { Pencil, Plus, Receipt, Trash2 } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { EmptyState } from '@/components/EmptyState';

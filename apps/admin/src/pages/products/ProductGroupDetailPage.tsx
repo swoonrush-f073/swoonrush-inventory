@@ -9,7 +9,7 @@ import {
   updateProductGroupSchema,
   type AddProductGroupVariantInput,
   type UpdateProductGroupInput,
-} from '@textile-admin/shared';
+} from '@swoonrush/shared';
 import { Pencil, Plus } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { ErrorState } from '@/components/ErrorState';

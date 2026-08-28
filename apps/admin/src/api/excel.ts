@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { DateRangeQuery, ExcelImportResult } from '@textile-admin/shared';
+import type { DateRangeQuery, ExcelImportResult } from '@swoonrush/shared';
 import { apiClient, triggerBlobDownload, uploadFile } from './client';
 
 export function useImportProducts() {

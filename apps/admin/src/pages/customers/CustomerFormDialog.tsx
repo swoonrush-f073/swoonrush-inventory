@@ -6,7 +6,7 @@ import {
   createCustomerSchema,
   type CreateCustomerInput,
   type CustomerWithStatsDto,
-} from '@textile-admin/shared';
+} from '@swoonrush/shared';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

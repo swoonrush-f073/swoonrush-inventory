@@ -4,7 +4,7 @@ import {
   createProductGroupSchema,
   productGroupQuerySchema,
   updateProductGroupSchema,
-} from '@textile-admin/shared';
+} from '@swoonrush/shared';
 import { productGroupService } from '../services/productGroupService.js';
 import { pathParam } from '../utils/params.js';
 import { ok } from '../utils/response.js';

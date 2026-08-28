@@ -1,5 +1,5 @@
 import type { Context } from 'hono';
-import type { ApiSuccess } from '@textile-admin/shared';
+import type { ApiSuccess } from '@swoonrush/shared';
 
 export function ok<T>(c: Context, data: T, status: 200 | 201 = 200) {
   const body: ApiSuccess<T> = { success: true, data };

@@ -1,4 +1,4 @@
-import type { PaginatedResult as SharedPaginatedResult } from '@textile-admin/shared';
+import type { PaginatedResult as SharedPaginatedResult } from '@swoonrush/shared';
 import { paginationMeta } from '../../utils/pagination.js';
 
 export type PaginatedResult<T> = SharedPaginatedResult<T>;

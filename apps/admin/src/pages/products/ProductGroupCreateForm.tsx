@@ -6,7 +6,7 @@ import {
   SIZE_PRESETS,
   createProductGroupSchema,
   type CreateProductGroupInput,
-} from '@textile-admin/shared';
+} from '@swoonrush/shared';
 import { Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

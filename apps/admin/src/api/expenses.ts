@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { CreateExpenseInput, ExpenseDto, ExpenseQuery, PaginatedResult, UpdateExpenseInput } from '@textile-admin/shared';
+import type { CreateExpenseInput, ExpenseDto, ExpenseQuery, PaginatedResult, UpdateExpenseInput } from '@swoonrush/shared';
 import { apiClient } from './client';
 
 const KEY = ['expenses'] as const;

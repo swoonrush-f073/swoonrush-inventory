@@ -1,4 +1,4 @@
-import type { PaginationMeta } from '@textile-admin/shared';
+import type { PaginationMeta } from '@swoonrush/shared';
 
 export function paginationMeta(page: number, limit: number, total: number): PaginationMeta {
   return {

@@ -5,7 +5,7 @@ import {
   updateOrderSchema,
   updateOrderStatusSchema,
   updatePaymentStatusSchema,
-} from '@textile-admin/shared';
+} from '@swoonrush/shared';
 import { orderService } from '../services/orderService.js';
 import { pathParam } from '../utils/params.js';
 import { ok } from '../utils/response.js';
