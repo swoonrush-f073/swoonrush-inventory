@@ -6,7 +6,25 @@ export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Raleway', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['"Playfair Display"', 'serif'],
+        price: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+      },
       colors: {
+        beige: {
+          DEFAULT: '#F7F5F3',
+          light: '#FAF8F6',
+          dark: '#EDE9E5',
+        },
+        pink: {
+          DEFAULT: '#E89CA9',
+          light: '#f0b3bd',
+          dark: '#dc7f8f',
+        },
+        'text-dark': '#2d2d2d',
+        'text-light': '#6b6b6b',
+        placeholder: '#f5f5f5',
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',

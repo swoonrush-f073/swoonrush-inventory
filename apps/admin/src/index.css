@@ -4,27 +4,30 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222 20% 15%;
+    /* Swoonrush brand palette (see tailwind.config.js `beige`/`pink`/`text-*`
+       for the hex source of truth — these are the same colors as HSL so
+       every hsl(var(--token)) consumer below picks them up automatically). */
+    --background: 30 20% 96%; /* beige */
+    --foreground: 0 0% 18%; /* text-dark */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222 20% 15%;
+    --card: 30 29% 97%; /* beige-light */
+    --card-foreground: 0 0% 18%; /* text-dark */
 
-    --border: 220 15% 91%;
-    --input: 220 15% 88%;
-    --ring: 222 47% 40%;
+    --border: 30 18% 91%; /* beige-dark */
+    --input: 30 18% 91%; /* beige-dark */
+    --ring: 350 57% 68%; /* pink-dark */
 
-    --primary: 222 47% 25%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 350 62% 76%; /* pink */
+    --primary-foreground: 0 0% 18%; /* text-dark (better contrast than white on pastel pink) */
 
-    --secondary: 220 20% 96%;
-    --secondary-foreground: 222 20% 15%;
+    --secondary: 30 18% 91%; /* beige-dark */
+    --secondary-foreground: 0 0% 18%; /* text-dark */
 
-    --muted: 220 20% 96%;
-    --muted-foreground: 220 10% 45%;
+    --muted: 30 18% 91%; /* beige-dark */
+    --muted-foreground: 0 0% 42%; /* text-light */
 
-    --accent: 220 20% 94%;
-    --accent-foreground: 222 20% 15%;
+    --accent: 350 67% 82%; /* pink-light */
+    --accent-foreground: 0 0% 18%; /* text-dark */
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
@@ -44,6 +47,28 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background text-foreground antialiased font-sans;
   }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: theme('fontFamily.display');
+  }
+}
+
+/* Custom scrollbar, matching the brand palette. */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: theme('colors.pink.DEFAULT');
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: theme('colors.pink.dark');
 }

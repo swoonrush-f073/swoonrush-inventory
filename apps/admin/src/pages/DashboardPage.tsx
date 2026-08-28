@@ -44,7 +44,7 @@ function StatCard({
       <CardContent className="flex items-center justify-between p-4">
         <div>
           <p className="text-xs font-medium text-muted-foreground">{label}</p>
-          <p className="mt-1 text-xl font-semibold tabular-nums">{value}</p>
+          <p className="mt-1 text-xl font-semibold tabular-nums font-price">{value}</p>
         </div>
         <div
           className={
