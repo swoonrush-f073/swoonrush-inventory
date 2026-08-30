@@ -1,4 +1,5 @@
 import type {
+  CatalogListItemDto,
   CreateProductInput,
   ProductDetailDto,
   ProductListItemDto,
@@ -14,7 +15,7 @@ import { inventoryMovementRepository } from '../repositories/inventoryMovementRe
 import { productImageRepository } from '../repositories/productImageRepository.js';
 import { productRepository } from '../repositories/productRepository.js';
 import { ApiError } from '../utils/apiError.js';
-import { mapProductDetail, mapProductListItem } from '../utils/mappers.js';
+import { mapCatalogItem, mapProductDetail, mapProductListItem } from '../utils/mappers.js';
 
 async function findRowOrThrow(id: string) {
   const row = await productRepository.findById(pool, id);
@@ -78,6 +79,18 @@ export const productService = {
   async list(filters: ProductQuery): Promise<PaginatedResult<ProductListItemDto>> {
     const { items, total } = await productRepository.list(pool, filters);
     return paginatedResult(items.map(mapProductListItem), filters.page, filters.limit, total);
+  },
+
+  async listCatalog(filters: {
+    page: number;
+    limit: number;
+    search?: string;
+    categoryId?: string;
+    status?: string;
+    stockStatus?: 'IN_STOCK' | 'LOW' | 'OUT_OF_STOCK';
+  }): Promise<PaginatedResult<CatalogListItemDto>> {
+    const { items, total } = await productRepository.listCatalog(pool, filters);
+    return paginatedResult(items.map(mapCatalogItem), filters.page, filters.limit, total);
   },
 
   async getById(id: string): Promise<ProductDetailDto> {

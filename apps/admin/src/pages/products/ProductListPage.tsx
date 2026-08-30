@@ -14,10 +14,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useCategories } from '@/api/categories';
-import { useDeleteProduct, useProducts } from '@/api/products';
+import { useCatalog, useDeleteProduct } from '@/api/products';
 import { useExportExcel } from '@/api/excel';
 import { formatCurrency } from '@/lib/utils';
-import type { ProductDetailDto } from '@swoonrush/shared';
+import type { CatalogListItemDto, ProductStatus, StockStatus } from '@swoonrush/shared';
 
 const ALL = '__all__';
 
@@ -29,16 +29,16 @@ export function ProductListPage() {
   const [categoryId, setCategoryId] = React.useState<string>(ALL);
   const [status, setStatus] = React.useState<string>(ALL);
   const [stockStatus, setStockStatus] = React.useState<string>(ALL);
-  const [deleteTarget, setDeleteTarget] = React.useState<ProductDetailDto | null>(null);
+  const [deleteTarget, setDeleteTarget] = React.useState<CatalogListItemDto | null>(null);
 
   const { data: categories } = useCategories();
-  const { data, isPending, isError, error, refetch } = useProducts({
+  const { data, isPending, isError, error, refetch } = useCatalog({
     page,
     limit,
     search: search || undefined,
     categoryId: categoryId === ALL ? undefined : categoryId,
-    status: status === ALL ? undefined : (status as ProductDetailDto['status']),
-    stockStatus: stockStatus === ALL ? undefined : (stockStatus as ProductDetailDto['stockStatus']),
+    status: status === ALL ? undefined : (status as ProductStatus),
+    stockStatus: stockStatus === ALL ? undefined : (stockStatus as StockStatus),
   });
   const deleteMutation = useDeleteProduct();
   const exportMutation = useExportExcel();
@@ -173,7 +173,6 @@ export function ProductListPage() {
                 <TableHead>Product</TableHead>
                 <TableHead>SKU</TableHead>
                 <TableHead>Category</TableHead>
-                <TableHead>Group</TableHead>
                 <TableHead>Size</TableHead>
                 <TableHead>Color</TableHead>
                 <TableHead className="text-right">Purchase</TableHead>
@@ -184,13 +183,17 @@ export function ProductListPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.items.map((product) => (
-                <TableRow key={product.id} className="cursor-pointer" onClick={() => navigate(`/products/${product.id}`)}>
+              {data.items.map((item) => (
+                <TableRow
+                  key={item.id}
+                  className="cursor-pointer"
+                  onClick={() => navigate(item.isGroup ? `/products/groups/${item.id}` : `/products/${item.id}`)}
+                >
                   <TableCell>
-                    {product.primaryImageUrl ? (
+                    {item.primaryImageUrl ? (
                       <img
-                        src={product.primaryImageUrl}
-                        alt={product.name}
+                        src={item.primaryImageUrl}
+                        alt={item.name}
                         className="h-10 w-10 rounded-md border object-cover"
                       />
                     ) : (
@@ -199,38 +202,44 @@ export function ProductListPage() {
                       </div>
                     )}
                   </TableCell>
-                  <TableCell className="font-medium">{product.name}</TableCell>
-                  <TableCell className="text-muted-foreground">{product.sku}</TableCell>
-                  <TableCell className="text-muted-foreground">{product.categoryName ?? '—'}</TableCell>
-                  <TableCell onClick={(e) => e.stopPropagation()}>
-                    {product.groupId ? (
-                      <Link to={`/products/groups/${product.groupId}`} className="text-primary hover:underline">
-                        {product.groupName}
-                      </Link>
-                    ) : (
-                      <span className="text-muted-foreground">—</span>
+                  <TableCell className="font-medium">
+                    {item.name}
+                    {item.isGroup && (
+                      <span className="ml-2 text-xs font-normal text-primary">
+                        {item.variantCount} variant{item.variantCount === 1 ? '' : 's'}
+                      </span>
                     )}
                   </TableCell>
-                  <TableCell>{product.size ?? '—'}</TableCell>
-                  <TableCell>{product.color ?? '—'}</TableCell>
-                  <TableCell className="text-right tabular-nums">{formatCurrency(product.purchasePrice)}</TableCell>
-                  <TableCell className="text-right tabular-nums">{formatCurrency(product.sellingPrice)}</TableCell>
+                  <TableCell className="text-muted-foreground">{item.sku ?? '—'}</TableCell>
+                  <TableCell className="text-muted-foreground">{item.categoryName ?? '—'}</TableCell>
+                  <TableCell>{item.size ?? '—'}</TableCell>
+                  <TableCell>{item.color ?? '—'}</TableCell>
+                  <TableCell className="text-right tabular-nums">{formatCurrency(item.purchasePrice)}</TableCell>
+                  <TableCell className="text-right tabular-nums">{formatCurrency(item.sellingPrice)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <span className="tabular-nums text-muted-foreground">{product.stockQuantity}</span>
-                      <StockStatusBadge status={product.stockStatus} />
+                      <span className="tabular-nums text-muted-foreground">{item.stockQuantity}</span>
+                      <StockStatusBadge status={item.stockStatus} />
                     </div>
                   </TableCell>
                   <TableCell>
-                    <ProductStatusBadge status={product.status} />
+                    <ProductStatusBadge status={item.status} />
                   </TableCell>
                   <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                    <Button variant="ghost" size="sm" asChild>
-                      <Link to={`/products/${product.id}/edit`}>Edit</Link>
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => setDeleteTarget(product)}>
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
+                    {item.isGroup ? (
+                      <Button variant="ghost" size="sm" asChild>
+                        <Link to={`/products/groups/${item.id}`}>View</Link>
+                      </Button>
+                    ) : (
+                      <>
+                        <Button variant="ghost" size="sm" asChild>
+                          <Link to={`/products/${item.id}/edit`}>Edit</Link>
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => setDeleteTarget(item)}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}

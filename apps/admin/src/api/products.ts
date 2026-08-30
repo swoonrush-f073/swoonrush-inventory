@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
   AddProductImageInput,
+  CatalogListItemDto,
   CreateProductInput,
   PaginatedResult,
   ProductDetailDto,
@@ -18,6 +19,13 @@ export function useProducts(query: Partial<ProductQuery> = {}) {
   return useQuery({
     queryKey: [...KEY, query],
     queryFn: () => apiClient.get<PaginatedResult<ProductDetailDto>>('/products', query),
+  });
+}
+
+export function useCatalog(query: Partial<ProductQuery> = {}) {
+  return useQuery({
+    queryKey: [...KEY, 'catalog', query],
+    queryFn: () => apiClient.get<PaginatedResult<CatalogListItemDto>>('/products/catalog', query),
   });
 }
 

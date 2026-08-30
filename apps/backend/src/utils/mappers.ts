@@ -1,4 +1,5 @@
 import type {
+  CatalogListItemDto,
   CategoryDto,
   CategoryRow,
   CustomerDto,
@@ -29,7 +30,7 @@ import type {
   OrderListItemDto,
   OrderRow,
 } from '@swoonrush/shared';
-import type { ProductListRow } from '../repositories/productRepository.js';
+import type { CatalogListRow, ProductListRow } from '../repositories/productRepository.js';
 import type { ProductGroupListRow } from '../repositories/productGroupRepository.js';
 import type { MovementListRow } from '../repositories/inventoryMovementRepository.js';
 import type { OrderListRow } from '../repositories/orderRepository.js';
@@ -164,6 +165,30 @@ export function mapProductGroup(row: ProductGroupListRow): ProductGroupDto {
     totalStock: row.total_stock,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+  };
+}
+
+export function mapCatalogItem(row: CatalogListRow): CatalogListItemDto {
+  const stockStatus: StockStatus =
+    row.stock_quantity <= 0 ? 'OUT_OF_STOCK' : row.low_stock_variant_count > 0 ? 'LOW' : 'IN_STOCK';
+
+  return {
+    id: row.id,
+    isGroup: row.is_group,
+    name: row.name,
+    sku: row.sku,
+    size: row.size,
+    color: row.color,
+    categoryId: row.category_id,
+    categoryName: row.category_name,
+    purchasePrice: Number(row.purchase_price),
+    sellingPrice: Number(row.selling_price),
+    status: row.status as ProductDetailDto['status'],
+    stockQuantity: row.stock_quantity,
+    stockStatus,
+    variantCount: row.variant_count,
+    primaryImageUrl: row.primary_image_url,
+    createdAt: row.created_at,
   };
 }
 

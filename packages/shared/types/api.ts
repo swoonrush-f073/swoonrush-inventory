@@ -270,6 +270,29 @@ export interface ProductGroupDetailDto extends ProductGroupDto {
   variants: ProductListItemDto[];
 }
 
+/** One row of the Products list page: either a product-group summary row
+ *  (isGroup: true, id is the groupId) or a standalone product row (isGroup:
+ *  false, id is the productId). Lets the list show one row per product
+ *  instead of one row per SKU/variant. */
+export interface CatalogListItemDto {
+  id: string;
+  isGroup: boolean;
+  name: string;
+  sku: string | null;
+  size: string | null;
+  color: string | null;
+  categoryId: string | null;
+  categoryName: string | null;
+  purchasePrice: number;
+  sellingPrice: number;
+  status: ProductStatus;
+  stockQuantity: number;
+  stockStatus: StockStatus;
+  variantCount: number;
+  primaryImageUrl: string | null;
+  createdAt: string;
+}
+
 /** Storefront-safe product shape: no purchasePrice (cost/margin) and no
  *  lowStockLimit (an internal operational threshold), unlike ProductListItemDto. */
 export interface PublicProductDto {

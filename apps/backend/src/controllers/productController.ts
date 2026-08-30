@@ -12,6 +12,12 @@ export const productController = {
     return ok(c, result);
   },
 
+  async listCatalog(c: Context<AppEnv>) {
+    const query = productQuerySchema.parse(c.req.query());
+    const result = await productService.listCatalog(query);
+    return ok(c, result);
+  },
+
   async getById(c: Context<AppEnv>) {
     const product = await productService.getById(pathParam(c, 'id'));
     return ok(c, product);

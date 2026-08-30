@@ -9,6 +9,7 @@ export const productRoutes = new Hono<AppEnv>();
 productRoutes.use('*', authenticate);
 
 productRoutes.get('/', productController.list);
+productRoutes.get('/catalog', productController.listCatalog);
 productRoutes.get('/:id', productController.getById);
 productRoutes.post('/', requireRole('OWNER', 'ADMIN'), productController.create);
 productRoutes.patch('/:id', requireRole('OWNER', 'ADMIN'), productController.update);

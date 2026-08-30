@@ -51,7 +51,127 @@ const LIST_SELECT = `
   LEFT JOIN product_groups pg ON pg.id = p.group_id
 `;
 
+export interface CatalogListRow {
+  id: string;
+  is_group: boolean;
+  name: string;
+  sku: string | null;
+  size: string | null;
+  color: string | null;
+  category_id: string | null;
+  category_name: string | null;
+  purchase_price: string;
+  selling_price: string;
+  status: string;
+  stock_quantity: number;
+  variant_count: number;
+  low_stock_variant_count: number;
+  primary_image_url: string | null;
+  created_at: string;
+}
+
+export interface CatalogListFilters {
+  page: number;
+  limit: number;
+  search?: string;
+  categoryId?: string;
+  status?: string;
+  stockStatus?: 'IN_STOCK' | 'LOW' | 'OUT_OF_STOCK';
+}
+
+const CATALOG_UNION = `
+  SELECT
+    pg.id, TRUE AS is_group, pg.name,
+    NULL::varchar AS sku, NULL::varchar AS size, NULL::varchar AS color,
+    pg.category_id, c.name AS category_name,
+    pg.purchase_price, pg.selling_price, pg.status,
+    COALESCE(SUM(p.stock_quantity), 0)::int AS stock_quantity,
+    COUNT(p.id)::int AS variant_count,
+    COUNT(*) FILTER (WHERE p.stock_quantity <= p.low_stock_limit)::int AS low_stock_variant_count,
+    (
+      SELECT pi.image_url FROM product_images pi
+      JOIN products p2 ON p2.id = pi.product_id
+      WHERE p2.group_id = pg.id AND pi.is_primary = TRUE
+      LIMIT 1
+    ) AS primary_image_url,
+    pg.created_at
+  FROM product_groups pg
+  LEFT JOIN categories c ON c.id = pg.category_id
+  LEFT JOIN products p ON p.group_id = pg.id
+  GROUP BY pg.id, c.name
+
+  UNION ALL
+
+  SELECT
+    p.id, FALSE AS is_group, p.name,
+    p.sku, p.size, p.color,
+    p.category_id, c.name AS category_name,
+    p.purchase_price, p.selling_price, p.status,
+    p.stock_quantity,
+    1 AS variant_count,
+    (CASE WHEN p.stock_quantity <= p.low_stock_limit THEN 1 ELSE 0 END) AS low_stock_variant_count,
+    (
+      SELECT pi.image_url FROM product_images pi
+      WHERE pi.product_id = p.id AND pi.is_primary = TRUE
+      LIMIT 1
+    ) AS primary_image_url,
+    p.created_at
+  FROM products p
+  LEFT JOIN categories c ON c.id = p.category_id
+  WHERE p.group_id IS NULL
+`;
+
 export const productRepository = {
+  async listCatalog(
+    db: Queryable,
+    filters: CatalogListFilters,
+  ): Promise<{ items: CatalogListRow[]; total: number }> {
+    const conditions: string[] = [];
+    const params: unknown[] = [];
+
+    if (filters.search) {
+      params.push(`%${filters.search}%`);
+      const i = params.length;
+      conditions.push(`(combined.name ILIKE $${i} OR combined.sku ILIKE $${i})`);
+    }
+    if (filters.categoryId) {
+      params.push(filters.categoryId);
+      conditions.push(`combined.category_id = $${params.length}`);
+    }
+    if (filters.status) {
+      params.push(filters.status);
+      conditions.push(`combined.status = $${params.length}`);
+    }
+    if (filters.stockStatus === 'OUT_OF_STOCK') {
+      conditions.push(`combined.stock_quantity = 0`);
+    } else if (filters.stockStatus === 'LOW') {
+      conditions.push(`combined.stock_quantity > 0 AND combined.low_stock_variant_count > 0`);
+    } else if (filters.stockStatus === 'IN_STOCK') {
+      conditions.push(`combined.stock_quantity > 0 AND combined.low_stock_variant_count = 0`);
+    }
+
+    const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+
+    const { rows: countRows } = await db.query<{ count: string }>(
+      `SELECT COUNT(*) FROM (${CATALOG_UNION}) combined ${where}`,
+      params,
+    );
+    const total = Number(countRows[0]?.count ?? 0);
+
+    const limitParamIndex = params.length + 1;
+    const offsetParamIndex = params.length + 2;
+    const { rows } = await db.query<CatalogListRow>(
+      `SELECT * FROM (${CATALOG_UNION}) combined
+       ${where}
+       ORDER BY combined.created_at DESC
+       LIMIT $${limitParamIndex} OFFSET $${offsetParamIndex}`,
+      [...params, filters.limit, offsetFor(filters.page, filters.limit)],
+    );
+
+    return { items: rows, total };
+  },
+
+
   async list(
     db: Queryable,
     filters: ProductListFilters,
