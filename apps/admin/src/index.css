@@ -18,7 +18,7 @@
     --ring: 350 57% 68%; /* pink-dark */
 
     --primary: 350 62% 76%; /* pink */
-    --primary-foreground: 0 0% 18%; /* text-dark (better contrast than white on pastel pink) */
+    --primary-foreground: 0 0% 100%; /* white */
 
     --secondary: 30 18% 91%; /* beige-dark */
     --secondary-foreground: 0 0% 18%; /* text-dark */
