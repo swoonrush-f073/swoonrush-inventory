@@ -90,7 +90,7 @@ export const productExcelImportService = {
         errors.push({ row: row.rowNumber, message: 'Stock must be a non-negative whole number' });
         continue;
       }
-      const resolvedLowStockLimit = lowStockLimit ?? 5;
+      const resolvedLowStockLimit = lowStockLimit ?? 1;
       if (resolvedLowStockLimit < 0 || !Number.isInteger(resolvedLowStockLimit)) {
         errors.push({ row: row.rowNumber, message: 'Low stock limit must be a non-negative whole number' });
         continue;

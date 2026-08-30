@@ -61,7 +61,7 @@ export function ProductFormPage() {
     resolver: zodResolver(schema),
     defaultValues: {
       status: 'ACTIVE',
-      lowStockLimit: 5,
+      lowStockLimit: 1,
       stockQuantity: 0,
     },
   });

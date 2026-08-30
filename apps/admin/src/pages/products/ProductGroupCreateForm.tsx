@@ -35,7 +35,7 @@ export function ProductGroupCreateForm() {
     resolver: zodResolver(createProductGroupSchema),
     defaultValues: {
       status: 'ACTIVE',
-      variants: [{ sku: '', size: '', color: '', stockQuantity: 0, lowStockLimit: 5 }],
+      variants: [{ sku: '', size: '', color: '', stockQuantity: 0, lowStockLimit: 1 }],
     },
   });
   const { fields, append, remove } = useFieldArray({ control, name: 'variants' });
@@ -204,7 +204,7 @@ export function ProductGroupCreateForm() {
             type="button"
             variant="outline"
             size="sm"
-            onClick={() => append({ sku: '', size: '', color: '', stockQuantity: 0, lowStockLimit: 5 })}
+            onClick={() => append({ sku: '', size: '', color: '', stockQuantity: 0, lowStockLimit: 1 })}
           >
             <Plus className="h-4 w-4" /> Add variant
           </Button>

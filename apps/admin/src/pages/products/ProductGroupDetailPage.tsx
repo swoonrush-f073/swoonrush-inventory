@@ -47,7 +47,7 @@ function AddVariantDialog({ groupId }: { groupId: string }) {
     formState: { errors, isSubmitting },
   } = useForm<AddProductGroupVariantInput>({
     resolver: zodResolver(addProductGroupVariantSchema),
-    defaultValues: { stockQuantity: 0, lowStockLimit: 5 },
+    defaultValues: { stockQuantity: 0, lowStockLimit: 1 },
   });
 
   async function onSubmit(values: AddProductGroupVariantInput) {
