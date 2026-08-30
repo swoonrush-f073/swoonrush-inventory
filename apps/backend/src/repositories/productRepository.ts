@@ -121,7 +121,99 @@ const CATALOG_UNION = `
   WHERE p.group_id IS NULL
 `;
 
+export interface InventoryCatalogListRow {
+  id: string;
+  is_group: boolean;
+  name: string;
+  sku: string | null;
+  size: string | null;
+  color: string | null;
+  status: string;
+  stock_quantity: number;
+  variant_count: number;
+  low_stock_variant_count: number;
+  low_stock_limit: number | null;
+  updated_at: string;
+}
+
+export interface InventoryCatalogListFilters {
+  page: number;
+  limit: number;
+  search?: string;
+  stockStatus?: 'IN_STOCK' | 'LOW' | 'OUT_OF_STOCK';
+}
+
+const INVENTORY_CATALOG_UNION = `
+  SELECT
+    pg.id, TRUE AS is_group, pg.name,
+    NULL::varchar AS sku, NULL::varchar AS size, NULL::varchar AS color,
+    pg.status,
+    COALESCE(SUM(p.stock_quantity), 0)::int AS stock_quantity,
+    COUNT(p.id)::int AS variant_count,
+    COUNT(*) FILTER (WHERE p.stock_quantity <= p.low_stock_limit)::int AS low_stock_variant_count,
+    NULL::int AS low_stock_limit,
+    COALESCE(MAX(p.updated_at), pg.updated_at) AS updated_at
+  FROM product_groups pg
+  LEFT JOIN products p ON p.group_id = pg.id
+  GROUP BY pg.id
+
+  UNION ALL
+
+  SELECT
+    p.id, FALSE AS is_group, p.name,
+    p.sku, p.size, p.color,
+    p.status,
+    p.stock_quantity,
+    1 AS variant_count,
+    (CASE WHEN p.stock_quantity <= p.low_stock_limit THEN 1 ELSE 0 END) AS low_stock_variant_count,
+    p.low_stock_limit,
+    p.updated_at
+  FROM products p
+  WHERE p.group_id IS NULL
+`;
+
 export const productRepository = {
+  async listInventoryCatalog(
+    db: Queryable,
+    filters: InventoryCatalogListFilters,
+  ): Promise<{ items: InventoryCatalogListRow[]; total: number }> {
+    const conditions: string[] = [];
+    const params: unknown[] = [];
+
+    if (filters.search) {
+      params.push(`%${filters.search}%`);
+      const i = params.length;
+      conditions.push(`(combined.name ILIKE $${i} OR combined.sku ILIKE $${i})`);
+    }
+    if (filters.stockStatus === 'OUT_OF_STOCK') {
+      conditions.push(`combined.stock_quantity = 0`);
+    } else if (filters.stockStatus === 'LOW') {
+      conditions.push(`combined.stock_quantity > 0 AND combined.low_stock_variant_count > 0`);
+    } else if (filters.stockStatus === 'IN_STOCK') {
+      conditions.push(`combined.stock_quantity > 0 AND combined.low_stock_variant_count = 0`);
+    }
+
+    const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+
+    const { rows: countRows } = await db.query<{ count: string }>(
+      `SELECT COUNT(*) FROM (${INVENTORY_CATALOG_UNION}) combined ${where}`,
+      params,
+    );
+    const total = Number(countRows[0]?.count ?? 0);
+
+    const limitParamIndex = params.length + 1;
+    const offsetParamIndex = params.length + 2;
+    const { rows } = await db.query<InventoryCatalogListRow>(
+      `SELECT * FROM (${INVENTORY_CATALOG_UNION}) combined
+       ${where}
+       ORDER BY combined.name ASC
+       LIMIT $${limitParamIndex} OFFSET $${offsetParamIndex}`,
+      [...params, filters.limit, offsetFor(filters.page, filters.limit)],
+    );
+
+    return { items: rows, total };
+  },
+
   async listCatalog(
     db: Queryable,
     filters: CatalogListFilters,

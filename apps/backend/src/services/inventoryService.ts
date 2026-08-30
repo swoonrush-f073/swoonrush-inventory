@@ -1,4 +1,5 @@
 import type {
+  InventoryCatalogItemDto,
   InventoryListItemDto,
   InventoryMovementDto,
   InventoryQuery,
@@ -12,7 +13,7 @@ import { pool, withTransaction } from '../config/db.js';
 import { inventoryMovementRepository } from '../repositories/inventoryMovementRepository.js';
 import { productRepository } from '../repositories/productRepository.js';
 import { ApiError } from '../utils/apiError.js';
-import { mapInventoryListItem, mapMovement } from '../utils/mappers.js';
+import { mapInventoryCatalogItem, mapInventoryListItem, mapMovement } from '../utils/mappers.js';
 import { productService } from './productService.js';
 
 export const inventoryService = {
@@ -22,10 +23,21 @@ export const inventoryService = {
       limit: filters.limit,
       search: filters.search,
       stockStatus: filters.stockStatus,
+      groupId: filters.groupId,
       sortBy: 'name',
       sortDir: 'asc',
     });
     return paginatedResult(items.map(mapInventoryListItem), filters.page, filters.limit, total);
+  },
+
+  async listCatalog(filters: {
+    page: number;
+    limit: number;
+    search?: string;
+    stockStatus?: 'IN_STOCK' | 'LOW' | 'OUT_OF_STOCK';
+  }): Promise<PaginatedResult<InventoryCatalogItemDto>> {
+    const { items, total } = await productRepository.listInventoryCatalog(pool, filters);
+    return paginatedResult(items.map(mapInventoryCatalogItem), filters.page, filters.limit, total);
   },
 
   async lowStock(pagination: {

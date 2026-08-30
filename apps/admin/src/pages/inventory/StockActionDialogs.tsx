@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { toast } from 'sonner';
 import type { InventoryListItemDto } from '@swoonrush/shared';
+
+type StockDialogTarget = Pick<InventoryListItemDto, 'id' | 'sku' | 'name' | 'stockQuantity'>;
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,7 +18,7 @@ import {
 import { useStockAdjust, useStockIn } from '@/api/inventory';
 
 interface StockDialogProps {
-  product: InventoryListItemDto | null;
+  product: StockDialogTarget | null;
   onOpenChange: (open: boolean) => void;
 }
 

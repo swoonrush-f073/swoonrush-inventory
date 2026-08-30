@@ -88,6 +88,28 @@ export interface InventoryListItemDto {
   updatedAt: string;
 }
 
+/** One row of the Inventory > Stock page's top-level list: either a
+ *  product-group summary row (isGroup: true, id is the groupId, aggregate
+ *  stock/status across every variant) or a standalone product's own stock
+ *  row (isGroup: false, same shape as InventoryListItemDto). Expanding a
+ *  group row fetches its variants via `GET /inventory?groupId=...`, which
+ *  already returns full InventoryListItemDto rows with working Stock
+ *  In/Adjust/History actions. */
+export interface InventoryCatalogItemDto {
+  id: string;
+  isGroup: boolean;
+  name: string;
+  variantCount: number;
+  stockQuantity: number;
+  stockStatus: StockStatus;
+  status: ProductStatus;
+  updatedAt: string;
+  sku: string | null;
+  size: string | null;
+  color: string | null;
+  lowStockLimit: number | null;
+}
+
 export interface OrderItemDto {
   id: string;
   productId: string;

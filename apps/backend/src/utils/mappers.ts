@@ -7,6 +7,7 @@ import type {
   CustomerWithStatsDto,
   ExpenseDto,
   ExpenseRow,
+  InventoryCatalogItemDto,
   InventoryListItemDto,
   ProductDetailDto,
   ProductGroupDetailDto,
@@ -30,7 +31,11 @@ import type {
   OrderListItemDto,
   OrderRow,
 } from '@swoonrush/shared';
-import type { CatalogListRow, ProductListRow } from '../repositories/productRepository.js';
+import type {
+  CatalogListRow,
+  InventoryCatalogListRow,
+  ProductListRow,
+} from '../repositories/productRepository.js';
 import type { ProductGroupListRow } from '../repositories/productGroupRepository.js';
 import type { MovementListRow } from '../repositories/inventoryMovementRepository.js';
 import type { OrderListRow } from '../repositories/orderRepository.js';
@@ -238,6 +243,24 @@ export function mapPublicProductDetail(
   return {
     ...mapPublicProduct(row),
     images: images.map(mapPublicProductImage),
+  };
+}
+
+export function mapInventoryCatalogItem(row: InventoryCatalogListRow): InventoryCatalogItemDto {
+  return {
+    id: row.id,
+    isGroup: row.is_group,
+    name: row.name,
+    variantCount: row.variant_count,
+    stockQuantity: row.stock_quantity,
+    stockStatus:
+      row.stock_quantity <= 0 ? 'OUT_OF_STOCK' : row.low_stock_variant_count > 0 ? 'LOW' : 'IN_STOCK',
+    status: row.status as ProductDetailDto['status'],
+    updatedAt: row.updated_at,
+    sku: row.sku,
+    size: row.size,
+    color: row.color,
+    lowStockLimit: row.low_stock_limit,
   };
 }
 

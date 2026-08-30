@@ -8,6 +8,7 @@ export const inventoryRoutes = new Hono<AppEnv>();
 inventoryRoutes.use('*', authenticate);
 
 inventoryRoutes.get('/', inventoryController.list);
+inventoryRoutes.get('/catalog', inventoryController.listCatalog);
 inventoryRoutes.get('/low-stock', inventoryController.lowStock);
 inventoryRoutes.get('/movements', inventoryController.movements);
 inventoryRoutes.post('/stock-in', requireRole('OWNER', 'ADMIN', 'STAFF'), inventoryController.stockIn);

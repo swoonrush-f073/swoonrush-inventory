@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
+  InventoryCatalogItemDto,
   InventoryListItemDto,
   InventoryMovementDto,
   InventoryQuery,
@@ -15,6 +16,21 @@ export function useInventory(query: Partial<InventoryQuery> = {}) {
   return useQuery({
     queryKey: ['inventory', query],
     queryFn: () => apiClient.get<PaginatedResult<InventoryListItemDto>>('/inventory', query),
+  });
+}
+
+export function useInventoryCatalog(query: Partial<InventoryQuery> = {}) {
+  return useQuery({
+    queryKey: ['inventory', 'catalog', query],
+    queryFn: () => apiClient.get<PaginatedResult<InventoryCatalogItemDto>>('/inventory/catalog', query),
+  });
+}
+
+export function useGroupVariantsInventory(groupId: string, enabled: boolean) {
+  return useQuery({
+    queryKey: ['inventory', 'group-variants', groupId],
+    queryFn: () => apiClient.get<PaginatedResult<InventoryListItemDto>>('/inventory', { groupId, limit: 100 }),
+    enabled,
   });
 }
 

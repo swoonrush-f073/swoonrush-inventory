@@ -17,6 +17,12 @@ export const inventoryController = {
     return ok(c, result);
   },
 
+  async listCatalog(c: Context<AppEnv>) {
+    const query = inventoryQuerySchema.parse(c.req.query());
+    const result = await inventoryService.listCatalog(query);
+    return ok(c, result);
+  },
+
   async lowStock(c: Context<AppEnv>) {
     const query = paginationQuerySchema.parse(c.req.query());
     const result = await inventoryService.lowStock(query);

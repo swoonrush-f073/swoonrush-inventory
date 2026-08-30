@@ -19,6 +19,7 @@ export type StockAdjustInput = z.infer<typeof stockAdjustSchema>;
 export const inventoryQuerySchema = paginationQuerySchema.extend({
   search: z.string().trim().optional(),
   stockStatus: z.enum(['IN_STOCK', 'LOW', 'OUT_OF_STOCK']).optional(),
+  groupId: z.string().uuid().optional(),
 });
 export type InventoryQuery = z.infer<typeof inventoryQuerySchema>;
 
