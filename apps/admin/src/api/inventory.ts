@@ -8,6 +8,7 @@ import type {
   PaginatedResult,
   ProductDetailDto,
   StockAdjustInput,
+  StockDamageInput,
   StockInInput,
 } from '@swoonrush/shared';
 import { apiClient } from './client';
@@ -53,6 +54,9 @@ function useInvalidateInventory() {
   return () => {
     queryClient.invalidateQueries({ queryKey: ['inventory'] });
     queryClient.invalidateQueries({ queryKey: ['products'] });
+    // Stock changes shift stat cards like Total Inventory Value / Total
+    // Damaged Stock Value, both sourced from GET /reports/inventory.
+    queryClient.invalidateQueries({ queryKey: ['reports'] });
   };
 }
 
@@ -68,6 +72,14 @@ export function useStockAdjust() {
   const invalidate = useInvalidateInventory();
   return useMutation({
     mutationFn: (input: StockAdjustInput) => apiClient.post<ProductDetailDto>('/inventory/adjust', input),
+    onSuccess: invalidate,
+  });
+}
+
+export function useStockDamage() {
+  const invalidate = useInvalidateInventory();
+  return useMutation({
+    mutationFn: (input: StockDamageInput) => apiClient.post<ProductDetailDto>('/inventory/damage', input),
     onSuccess: invalidate,
   });
 }

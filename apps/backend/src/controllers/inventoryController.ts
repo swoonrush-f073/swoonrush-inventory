@@ -4,6 +4,7 @@ import {
   movementQuerySchema,
   paginationQuerySchema,
   stockAdjustSchema,
+  stockDamageSchema,
   stockInSchema,
 } from '@swoonrush/shared';
 import { inventoryService } from '../services/inventoryService.js';
@@ -46,6 +47,13 @@ export const inventoryController = {
     const input = stockAdjustSchema.parse(await c.req.json());
     const user = c.get('user');
     const product = await inventoryService.adjust(input, user.id);
+    return ok(c, product);
+  },
+
+  async reportDamage(c: Context<AppEnv>) {
+    const input = stockDamageSchema.parse(await c.req.json());
+    const user = c.get('user');
+    const product = await inventoryService.reportDamage(input, user.id);
     return ok(c, product);
   },
 };

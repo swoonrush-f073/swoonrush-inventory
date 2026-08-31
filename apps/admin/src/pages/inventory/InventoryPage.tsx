@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { Boxes, ChevronDown, ChevronRight, History, IndianRupee, Search } from 'lucide-react';
+import { AlertTriangle, Boxes, ChevronDown, ChevronRight, History, IndianRupee, Search } from 'lucide-react';
 import type { InventoryCatalogItemDto } from '@swoonrush/shared';
 import { PageHeader } from '@/components/PageHeader';
 import { EmptyState } from '@/components/EmptyState';
@@ -16,7 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useGroupVariantsInventory, useInventoryCatalog } from '@/api/inventory';
 import { useInventoryReport } from '@/api/reports';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
-import { AdjustStockDialog, StockInDialog } from './StockActionDialogs';
+import { AdjustStockDialog, ReportDamageDialog, StockInDialog } from './StockActionDialogs';
 
 const ALL = '__all__';
 
@@ -27,7 +27,7 @@ function TotalInventoryValueCard() {
   const { data, isPending } = useInventoryReport();
 
   return (
-    <Card className="mb-4 max-w-xs">
+    <Card className="max-w-xs">
       <CardContent className="flex items-center justify-between p-4">
         <div>
           <p className="text-xs text-muted-foreground">Total Inventory Value</p>
@@ -43,23 +43,50 @@ function TotalInventoryValueCard() {
   );
 }
 
+/** Lifetime cost of every unit ever marked damaged (quantity × purchase
+ *  price), across all products regardless of current status — unlike
+ *  TotalInventoryValueCard above (which only covers ACTIVE products' current
+ *  stock), this also counts damage recorded against products since archived,
+ *  so the two cards intentionally don't share the same product population. */
+function TotalDamagedStockValueCard() {
+  const { data, isPending } = useInventoryReport();
+
+  return (
+    <Card className="max-w-xs">
+      <CardContent className="flex items-center justify-between p-4">
+        <div>
+          <p className="text-xs text-muted-foreground">Total Damaged Stock Value</p>
+          <p className="mt-1 text-xl font-semibold tabular-nums">
+            {isPending || !data ? <Skeleton className="h-6 w-24" /> : formatCurrency(data.damagedStockValue)}
+          </p>
+        </div>
+        <div className="rounded-full bg-destructive/10 p-2 text-destructive">
+          <AlertTriangle className="h-4 w-4" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 type StockTarget = { id: string; sku: string; name: string; stockQuantity: number };
 
 function GroupVariantRows({
   groupId,
   onStockIn,
   onAdjust,
+  onDamage,
 }: {
   groupId: string;
   onStockIn: (target: StockTarget) => void;
   onAdjust: (target: StockTarget) => void;
+  onDamage: (target: StockTarget) => void;
 }) {
   const { data, isPending } = useGroupVariantsInventory(groupId, true);
 
   if (isPending) {
     return (
       <TableRow>
-        <TableCell colSpan={10}>
+        <TableCell colSpan={11}>
           <Skeleton className="h-8 w-full" />
         </TableCell>
       </TableRow>
@@ -76,6 +103,7 @@ function GroupVariantRows({
           <TableCell>{variant.color ?? '—'}</TableCell>
           <TableCell className="text-right tabular-nums">{variant.stockQuantity}</TableCell>
           <TableCell className="text-right tabular-nums text-muted-foreground">{variant.totalStockIn}</TableCell>
+          <TableCell className="text-right tabular-nums text-muted-foreground">{variant.totalDamaged}</TableCell>
           <TableCell className="text-right tabular-nums text-muted-foreground">
             {variant.lowStockLimit}
           </TableCell>
@@ -92,6 +120,9 @@ function GroupVariantRows({
             </Button>
             <Button variant="ghost" size="sm" onClick={() => onAdjust(variant)}>
               Adjust
+            </Button>
+            <Button variant="ghost" size="sm" className="text-destructive" onClick={() => onDamage(variant)}>
+              Damage
             </Button>
             <Button variant="ghost" size="sm" asChild>
               <Link to={`/inventory/movements?productId=${variant.id}`}>History</Link>
@@ -111,6 +142,7 @@ export function InventoryPage() {
   const [expanded, setExpanded] = React.useState<Set<string>>(new Set());
   const [stockInTarget, setStockInTarget] = React.useState<StockTarget | null>(null);
   const [adjustTarget, setAdjustTarget] = React.useState<StockTarget | null>(null);
+  const [damageTarget, setDamageTarget] = React.useState<StockTarget | null>(null);
 
   const { data, isPending, isError, error, refetch } = useInventoryCatalog({
     page,
@@ -142,7 +174,10 @@ export function InventoryPage() {
         }
       />
 
-      <TotalInventoryValueCard />
+      <div className="mb-4 flex flex-wrap gap-3">
+        <TotalInventoryValueCard />
+        <TotalDamagedStockValueCard />
+      </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <div className="relative w-full max-w-xs">
@@ -199,6 +234,7 @@ export function InventoryPage() {
                 <TableHead>Color</TableHead>
                 <TableHead className="text-right">Current Stock</TableHead>
                 <TableHead className="text-right">Total Stock</TableHead>
+                <TableHead className="text-right">Damaged Stock</TableHead>
                 <TableHead className="text-right">Low Stock Limit</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Last Updated</TableHead>
@@ -238,6 +274,9 @@ export function InventoryPage() {
                       {item.totalStockIn}
                     </TableCell>
                     <TableCell className="text-right tabular-nums text-muted-foreground">
+                      {item.totalDamaged}
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums text-muted-foreground">
                       {item.lowStockLimit ?? '—'}
                     </TableCell>
                     <TableCell>
@@ -268,6 +307,16 @@ export function InventoryPage() {
                           >
                             Adjust
                           </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-destructive"
+                            onClick={() =>
+                              setDamageTarget({ id: item.id, sku: item.sku!, name: item.name, stockQuantity: item.stockQuantity })
+                            }
+                          >
+                            Damage
+                          </Button>
                           <Button variant="ghost" size="sm" asChild>
                             <Link to={`/inventory/movements?productId=${item.id}`}>History</Link>
                           </Button>
@@ -276,7 +325,12 @@ export function InventoryPage() {
                     </TableCell>
                   </TableRow>
                   {item.isGroup && expanded.has(item.id) && (
-                    <GroupVariantRows groupId={item.id} onStockIn={setStockInTarget} onAdjust={setAdjustTarget} />
+                    <GroupVariantRows
+                      groupId={item.id}
+                      onStockIn={setStockInTarget}
+                      onAdjust={setAdjustTarget}
+                      onDamage={setDamageTarget}
+                    />
                   )}
                 </React.Fragment>
               ))}
@@ -288,6 +342,7 @@ export function InventoryPage() {
 
       <StockInDialog product={stockInTarget} onOpenChange={(open) => !open && setStockInTarget(null)} />
       <AdjustStockDialog product={adjustTarget} onOpenChange={(open) => !open && setAdjustTarget(null)} />
+      <ReportDamageDialog product={damageTarget} onOpenChange={(open) => !open && setDamageTarget(null)} />
     </div>
   );
 }

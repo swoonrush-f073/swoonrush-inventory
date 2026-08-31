@@ -34,7 +34,7 @@ export const reportService = {
     const grossProfit = profit.grossProfit;
     const netProfit = grossProfit - expensesTotal;
 
-    const lowStockTotals = await inventoryMovementRepository.totalStockInByProduct(
+    const lowStockTotals = await inventoryMovementRepository.movementTotalsByProduct(
       pool,
       lowStock.items.map((item) => item.id),
     );
@@ -52,7 +52,10 @@ export const reportService = {
       topProducts,
       orderStatusDistribution: orderDist,
       paymentStatusDistribution: paymentDist,
-      lowStockProducts: lowStock.items.map((row) => mapInventoryListItem(row, lowStockTotals.get(row.id) ?? 0)),
+      lowStockProducts: lowStock.items.map((row) => {
+        const t = lowStockTotals.get(row.id);
+        return mapInventoryListItem(row, t?.stockIn ?? 0, t?.damaged ?? 0);
+      }),
     };
   },
 
@@ -94,6 +97,7 @@ export const reportService = {
       totalProducts: summary.totalProducts,
       totalUnits: summary.totalUnits,
       inventoryValue: summary.inventoryValue,
+      damagedStockValue: summary.damagedStockValue,
       lowStockCount: stockCounts.lowStockCount,
       outOfStockCount: stockCounts.outOfStockCount,
     };

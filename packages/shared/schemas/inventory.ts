@@ -16,6 +16,13 @@ export const stockAdjustSchema = z.object({
 });
 export type StockAdjustInput = z.infer<typeof stockAdjustSchema>;
 
+export const stockDamageSchema = z.object({
+  productId: z.string().uuid(),
+  quantity: z.coerce.number().int().positive('Quantity must be greater than 0'),
+  reason: z.string().trim().min(1, 'Reason is required').max(500),
+});
+export type StockDamageInput = z.infer<typeof stockDamageSchema>;
+
 export const inventoryQuerySchema = paginationQuerySchema.extend({
   search: z.string().trim().optional(),
   stockStatus: z.enum(['IN_STOCK', 'LOW', 'OUT_OF_STOCK']).optional(),

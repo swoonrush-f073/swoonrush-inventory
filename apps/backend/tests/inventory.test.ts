@@ -72,6 +72,58 @@ describe('stock adjustment', () => {
   });
 });
 
+describe('damage reporting', () => {
+  it('decreases stock and records a DAMAGE movement', async () => {
+    const { status, json } = await api.post('/api/inventory/damage', {
+      token,
+      body: { productId, quantity: 4, reason: 'Water damage in storage' },
+    });
+
+    expect(status).toBe(200);
+    expect(json.data.stockQuantity).toBe(6);
+
+    const movements = await api.get(`/api/inventory/movements?productId=${productId}&type=DAMAGE`, { token });
+    expect(movements.json.data.items).toHaveLength(1);
+    expect(movements.json.data.items[0].quantity).toBe(-4);
+  });
+
+  it('rejects damaging more units than are in stock, and does not change stock', async () => {
+    const { status, json } = await api.post('/api/inventory/damage', {
+      token,
+      body: { productId, quantity: 1000, reason: 'Too much' },
+    });
+
+    expect(status).toBe(422);
+    expect(json.error.code).toBe('VALIDATION_ERROR');
+
+    const product = await api.get(`/api/products/${productId}`, { token });
+    expect(product.json.data.stockQuantity).toBe(10); // unchanged
+  });
+
+  it('requires a reason', async () => {
+    const { status } = await api.post('/api/inventory/damage', {
+      token,
+      body: { productId, quantity: 1, reason: '' },
+    });
+    expect(status).toBe(422);
+  });
+
+  it('reports totalDamaged per product and damagedStockValue in the inventory report', async () => {
+    await api.post('/api/inventory/damage', { token, body: { productId, quantity: 3, reason: 'Torn' } });
+
+    const list = await api.get('/api/inventory', { token });
+    const row = list.json.data.items.find((p: { id: string }) => p.id === productId);
+    expect(row.totalDamaged).toBe(3);
+
+    const catalog = await api.get('/api/inventory/catalog', { token });
+    const catalogRow = catalog.json.data.items.find((p: { id: string }) => p.id === productId);
+    expect(catalogRow.totalDamaged).toBe(3);
+
+    const report = await api.get('/api/reports/inventory', { token });
+    expect(report.json.data.damagedStockValue).toBe(900); // 3 * purchasePrice(300)
+  });
+});
+
 describe('low-stock listing', () => {
   it('flags a product as low stock once quantity drops to the limit', async () => {
     await api.post('/api/inventory/adjust', {

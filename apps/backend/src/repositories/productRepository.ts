@@ -134,6 +134,8 @@ export interface InventoryCatalogListRow {
   low_stock_variant_count: number;
   low_stock_limit: number | null;
   total_stock_in: number;
+  /** Lifetime units ever marked damaged (DAMAGE movements), reported as a positive count. */
+  total_damaged: number;
   updated_at: string;
 }
 
@@ -158,6 +160,11 @@ const INVENTORY_CATALOG_UNION = `
       JOIN products p2 ON p2.id = im.product_id
       WHERE p2.group_id = pg.id AND im.type IN ('OPENING_STOCK', 'STOCK_IN')
     ) AS total_stock_in,
+    (
+      SELECT COALESCE(SUM(-im.quantity), 0)::int FROM inventory_movements im
+      JOIN products p2 ON p2.id = im.product_id
+      WHERE p2.group_id = pg.id AND im.type = 'DAMAGE'
+    ) AS total_damaged,
     COALESCE(MAX(p.updated_at), pg.updated_at) AS updated_at
   FROM product_groups pg
   LEFT JOIN products p ON p.group_id = pg.id
@@ -177,6 +184,10 @@ const INVENTORY_CATALOG_UNION = `
       SELECT COALESCE(SUM(im.quantity), 0)::int FROM inventory_movements im
       WHERE im.product_id = p.id AND im.type IN ('OPENING_STOCK', 'STOCK_IN')
     ) AS total_stock_in,
+    (
+      SELECT COALESCE(SUM(-im.quantity), 0)::int FROM inventory_movements im
+      WHERE im.product_id = p.id AND im.type = 'DAMAGE'
+    ) AS total_damaged,
     p.updated_at
   FROM products p
   WHERE p.group_id IS NULL

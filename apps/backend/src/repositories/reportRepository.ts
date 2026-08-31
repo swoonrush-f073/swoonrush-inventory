@@ -188,16 +188,27 @@ export const reportRepository = {
 
   async inventorySummary(
     db: Queryable,
-  ): Promise<{ totalProducts: number; totalUnits: number; inventoryValue: number }> {
+  ): Promise<{ totalProducts: number; totalUnits: number; inventoryValue: number; damagedStockValue: number }> {
     const { rows } = await db.query<{
       total_products: string;
       total_units: string | null;
       inventory_value: string | null;
+      damaged_stock_value: string | null;
     }>(
       `SELECT
          COUNT(*) AS total_products,
          COALESCE(SUM(stock_quantity), 0) AS total_units,
-         COALESCE(SUM(stock_quantity * purchase_price), 0) AS inventory_value
+         COALESCE(SUM(stock_quantity * purchase_price), 0) AS inventory_value,
+         -- Deliberately NOT scoped to status = 'ACTIVE' like the columns above:
+         -- damage already happened and is a sunk cost, so a product being
+         -- archived/discontinued later (possibly because it kept getting
+         -- damaged) shouldn't make that historical loss disappear from the total.
+         (
+           SELECT COALESCE(SUM(-im.quantity * p.purchase_price), 0)
+           FROM inventory_movements im
+           JOIN products p ON p.id = im.product_id
+           WHERE im.type = 'DAMAGE'
+         ) AS damaged_stock_value
        FROM products
        WHERE status = 'ACTIVE'`,
     );
@@ -206,6 +217,7 @@ export const reportRepository = {
       totalProducts: Number(row.total_products),
       totalUnits: Number(row.total_units ?? 0),
       inventoryValue: Number(row.inventory_value ?? 0),
+      damagedStockValue: Number(row.damaged_stock_value ?? 0),
     };
   },
 };

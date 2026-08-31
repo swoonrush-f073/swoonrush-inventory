@@ -82,6 +82,8 @@ export interface InventoryListItemDto {
   stockQuantity: number;
   /** Lifetime units ever added to stock (OPENING_STOCK + STOCK_IN movements), never netted against sales/damage/etc. */
   totalStockIn: number;
+  /** Lifetime units ever marked damaged (DAMAGE movements), reported as a positive count. */
+  totalDamaged: number;
   lowStockLimit: number;
   stockStatus: StockStatus;
   status: ProductStatus;
@@ -105,6 +107,8 @@ export interface InventoryCatalogItemDto {
   stockQuantity: number;
   /** Lifetime units ever added to stock (OPENING_STOCK + STOCK_IN movements), never netted against sales/damage/etc. */
   totalStockIn: number;
+  /** Lifetime units ever marked damaged (DAMAGE movements), reported as a positive count. */
+  totalDamaged: number;
   stockStatus: StockStatus;
   status: ProductStatus;
   updatedAt: string;
@@ -195,6 +199,8 @@ export interface InventoryReportDto {
   totalProducts: number;
   totalUnits: number;
   inventoryValue: number;
+  /** Lifetime cost of every unit ever marked damaged (quantity × purchase price), across all products. */
+  damagedStockValue: number;
   lowStockCount: number;
   outOfStockCount: number;
 }

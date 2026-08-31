@@ -48,19 +48,30 @@ export const inventoryMovementRepository = {
     return rows[0]!;
   },
 
-  /** Lifetime units ever added to stock (OPENING_STOCK + STOCK_IN), keyed by product id.
-   *  Never nets against sales/damage/etc — see mappers.ts's InventoryListItemDto usage. */
-  async totalStockInByProduct(db: Queryable, productIds: string[]): Promise<Map<string, number>> {
+  /** Lifetime "stock in" (OPENING_STOCK + STOCK_IN) and "damaged" (DAMAGE) unit
+   *  totals per product, in one grouped scan of inventory_movements rather than
+   *  two — both are always fetched together by every caller. Neither nets
+   *  against other movement types (sales/adjustments/etc); DAMAGE quantities
+   *  are stored negative (see reportDamage) and reported here as positive counts. */
+  async movementTotalsByProduct(
+    db: Queryable,
+    productIds: string[],
+  ): Promise<Map<string, { stockIn: number; damaged: number }>> {
     if (productIds.length === 0) return new Map();
 
-    const { rows } = await db.query<{ product_id: string; total: string }>(
-      `SELECT product_id, COALESCE(SUM(quantity), 0) AS total
+    const { rows } = await db.query<{ product_id: string; stock_in: string; damaged: string }>(
+      `SELECT
+         product_id,
+         COALESCE(SUM(quantity) FILTER (WHERE type IN ('OPENING_STOCK', 'STOCK_IN')), 0) AS stock_in,
+         COALESCE(SUM(-quantity) FILTER (WHERE type = 'DAMAGE'), 0) AS damaged
        FROM inventory_movements
-       WHERE product_id = ANY($1) AND type IN ('OPENING_STOCK', 'STOCK_IN')
+       WHERE product_id = ANY($1)
        GROUP BY product_id`,
       [productIds],
     );
-    return new Map(rows.map((row) => [row.product_id, Number(row.total)]));
+    return new Map(
+      rows.map((row) => [row.product_id, { stockIn: Number(row.stock_in), damaged: Number(row.damaged) }]),
+    );
   },
 
   async existsForProduct(db: Queryable, productId: string): Promise<boolean> {

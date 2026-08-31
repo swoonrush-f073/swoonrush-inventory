@@ -6,6 +6,7 @@ import type {
   MovementQuery,
   ProductDetailDto,
   StockAdjustInput,
+  StockDamageInput,
   StockInInput,
 } from '@swoonrush/shared';
 import { paginatedResult, type PaginatedResult } from './helpers/paginatedResult.js';
@@ -27,9 +28,15 @@ export const inventoryService = {
       sortBy: 'name',
       sortDir: 'asc',
     });
-    const totals = await inventoryMovementRepository.totalStockInByProduct(pool, items.map((item) => item.id));
+    const totals = await inventoryMovementRepository.movementTotalsByProduct(
+      pool,
+      items.map((item) => item.id),
+    );
     return paginatedResult(
-      items.map((row) => mapInventoryListItem(row, totals.get(row.id) ?? 0)),
+      items.map((row) => {
+        const t = totals.get(row.id);
+        return mapInventoryListItem(row, t?.stockIn ?? 0, t?.damaged ?? 0);
+      }),
       filters.page,
       filters.limit,
       total,
@@ -51,9 +58,15 @@ export const inventoryService = {
     limit: number;
   }): Promise<PaginatedResult<InventoryListItemDto>> {
     const { items, total } = await productRepository.listLowStock(pool, pagination);
-    const totals = await inventoryMovementRepository.totalStockInByProduct(pool, items.map((item) => item.id));
+    const totals = await inventoryMovementRepository.movementTotalsByProduct(
+      pool,
+      items.map((item) => item.id),
+    );
     return paginatedResult(
-      items.map((row) => mapInventoryListItem(row, totals.get(row.id) ?? 0)),
+      items.map((row) => {
+        const t = totals.get(row.id);
+        return mapInventoryListItem(row, t?.stockIn ?? 0, t?.damaged ?? 0);
+      }),
       pagination.page,
       pagination.limit,
       total,
@@ -101,6 +114,30 @@ export const inventoryService = {
         productId: product.id,
         type: 'ADJUSTMENT',
         quantity: input.quantity,
+        reason: input.reason,
+        createdBy: userId,
+      });
+    });
+
+    return productService.getById(input.productId);
+  },
+
+  async reportDamage(input: StockDamageInput, userId: string): Promise<ProductDetailDto> {
+    await withTransaction(async (client) => {
+      const product = await productRepository.lockForUpdate(client, input.productId);
+      if (!product) throw ApiError.notFound('Product');
+
+      if (input.quantity > product.stock_quantity) {
+        throw ApiError.validation(
+          `Cannot mark more units damaged than are in stock (have ${product.stock_quantity}, tried ${input.quantity})`,
+        );
+      }
+
+      await productRepository.setStockQuantity(client, product.id, product.stock_quantity - input.quantity);
+      await inventoryMovementRepository.create(client, {
+        productId: product.id,
+        type: 'DAMAGE',
+        quantity: -input.quantity,
         reason: input.reason,
         createdBy: userId,
       });

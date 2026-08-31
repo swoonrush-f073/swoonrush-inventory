@@ -13,3 +13,4 @@ inventoryRoutes.get('/low-stock', inventoryController.lowStock);
 inventoryRoutes.get('/movements', inventoryController.movements);
 inventoryRoutes.post('/stock-in', requireRole('OWNER', 'ADMIN', 'STAFF'), inventoryController.stockIn);
 inventoryRoutes.post('/adjust', requireRole('OWNER', 'ADMIN', 'STAFF'), inventoryController.adjust);
+inventoryRoutes.post('/damage', requireRole('OWNER', 'ADMIN', 'STAFF'), inventoryController.reportDamage);

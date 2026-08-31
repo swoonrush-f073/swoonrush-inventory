@@ -15,7 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { useStockAdjust, useStockIn } from '@/api/inventory';
+import { useStockAdjust, useStockDamage, useStockIn } from '@/api/inventory';
 
 interface StockDialogProps {
   product: StockDialogTarget | null;
@@ -157,6 +157,81 @@ export function AdjustStockDialog({ product, onOpenChange }: StockDialogProps) {
           <DialogFooter>
             <Button type="submit" disabled={mutation.isPending}>
               {mutation.isPending ? 'Saving…' : 'Adjust Stock'}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function ReportDamageDialog({ product, onOpenChange }: StockDialogProps) {
+  const [quantity, setQuantity] = React.useState('');
+  const [reason, setReason] = React.useState('');
+  const mutation = useStockDamage();
+
+  React.useEffect(() => {
+    if (product) {
+      setQuantity('');
+      setReason('');
+    }
+  }, [product]);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!product) return;
+    const qty = Number(quantity);
+    if (!qty || qty <= 0) {
+      toast.error('Enter a quantity greater than 0');
+      return;
+    }
+    if (!reason.trim()) {
+      toast.error('A reason is required');
+      return;
+    }
+    try {
+      await mutation.mutateAsync({ productId: product.id, quantity: qty, reason });
+      toast.success(`Marked ${qty} unit${qty === 1 ? '' : 's'} of ${product.sku} damaged`);
+      onOpenChange(false);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Could not report damage');
+    }
+  }
+
+  return (
+    <Dialog open={Boolean(product)} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Report Damage — {product?.sku}</DialogTitle>
+          <DialogDescription>
+            Removes damaged units from sellable stock for {product?.name}.
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="damage-qty">Units damaged</Label>
+            <Input
+              id="damage-qty"
+              type="number"
+              min={1}
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value)}
+              autoFocus
+            />
+            <p className="text-xs text-muted-foreground">Current stock: {product?.stockQuantity}</p>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="damage-reason">Reason</Label>
+            <Textarea
+              id="damage-reason"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder="e.g. Water damage in storage"
+            />
+          </div>
+          <DialogFooter>
+            <Button type="submit" variant="destructive" disabled={mutation.isPending}>
+              {mutation.isPending ? 'Saving…' : 'Report Damage'}
             </Button>
           </DialogFooter>
         </form>
