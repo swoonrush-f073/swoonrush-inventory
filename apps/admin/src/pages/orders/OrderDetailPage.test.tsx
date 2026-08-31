@@ -1,9 +1,11 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
+import type { OrderStatus } from '@swoonrush/shared';
 import { renderWithProviders } from '@/test/testUtils';
 import { OrderDetailPage } from './OrderDetailPage';
 
 const updateStatus = vi.fn().mockResolvedValue({});
+const updateOrder = vi.fn().mockResolvedValue({});
 
 const order = {
   id: 'order-1',
@@ -38,13 +40,26 @@ const order = {
   updatedAt: '2026-01-01T00:00:00.000Z',
 };
 
+let currentOrder: Omit<typeof order, 'orderStatus'> & { orderStatus: OrderStatus } = order;
+
 vi.mock('@/api/orders', () => ({
-  useOrder: () => ({ data: order, isPending: false, isError: false, error: null, refetch: vi.fn() }),
+  useOrder: () => ({ data: currentOrder, isPending: false, isError: false, error: null, refetch: vi.fn() }),
   useUpdateOrderStatus: () => ({ mutateAsync: updateStatus, isPending: false }),
   useUpdatePaymentStatus: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useUpdateOrder: () => ({ mutateAsync: updateOrder, isPending: false }),
+}));
+
+vi.mock('@/api/customers', () => ({
+  useCustomers: () => ({ data: { items: [] }, isPending: false }),
+  useCreateCustomer: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useUpdateCustomer: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }));
 
 describe('OrderDetailPage', () => {
+  beforeEach(() => {
+    currentOrder = order;
+  });
+
   it('shows only the transitions allowed from PENDING', () => {
     renderWithProviders(<OrderDetailPage />, { route: '/orders/order-1', path: '/orders/:id' });
 
@@ -63,5 +78,35 @@ describe('OrderDetailPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /^confirm$/i }));
 
     await waitFor(() => expect(updateStatus).toHaveBeenCalledWith('CONFIRMED'));
+  });
+
+  it('opens the edit dialog and saves the edited fields', async () => {
+    renderWithProviders(<OrderDetailPage />, { route: '/orders/order-1', path: '/orders/:id' });
+
+    fireEvent.click(screen.getByRole('button', { name: /^edit$/i }));
+    expect(screen.getByRole('heading', { name: /edit order ord-1001/i })).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText(/^discount$/i), { target: { value: '50' } });
+    fireEvent.click(screen.getByRole('button', { name: /save changes/i }));
+
+    await waitFor(() =>
+      expect(updateOrder).toHaveBeenCalledWith(
+        expect.objectContaining({ discount: 50, shippingFee: 0, tax: 0, stitchingCharge: 0 }),
+      ),
+    );
+  });
+
+  it('lets a cancelled order be reopened back to Pending', async () => {
+    currentOrder = { ...order, orderStatus: 'CANCELLED' };
+    renderWithProviders(<OrderDetailPage />, { route: '/orders/order-1', path: '/orders/:id' });
+
+    expect(screen.queryByRole('button', { name: /mark as/i })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /reopen order/i }));
+    expect(screen.getByText(/reopen this order\?/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /^confirm$/i }));
+
+    await waitFor(() => expect(updateStatus).toHaveBeenCalledWith('PENDING'));
   });
 });

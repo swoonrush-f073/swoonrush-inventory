@@ -169,4 +169,33 @@ describe('order cancellation', () => {
     const product = await api.get(`/api/products/${productId}`, { token });
     expect(product.json.data.stockQuantity).toBe(10); // not 13
   });
+
+  it('allows reopening a cancelled order back to Pending, with no stock side effects', async () => {
+    const order = await api.post('/api/orders', { token, body: { items: [{ productId, quantity: 3 }] } });
+    await api.patch(`/api/orders/${order.json.data.id}/status`, { token, body: { status: 'CONFIRMED' } });
+    await api.patch(`/api/orders/${order.json.data.id}/status`, { token, body: { status: 'CANCELLED' } });
+
+    const { status, json } = await api.patch(`/api/orders/${order.json.data.id}/status`, {
+      token,
+      body: { status: 'PENDING' },
+    });
+
+    expect(status).toBe(200);
+    expect(json.data.orderStatus).toBe('PENDING');
+
+    const product = await api.get(`/api/products/${productId}`, { token });
+    expect(product.json.data.stockQuantity).toBe(10); // still fully restored, nothing re-deducted
+  });
+
+  it('rejects reopening an order that was never cancelled', async () => {
+    const order = await api.post('/api/orders', { token, body: { items: [{ productId, quantity: 3 }] } });
+    await api.patch(`/api/orders/${order.json.data.id}/status`, { token, body: { status: 'CONFIRMED' } });
+
+    const { status } = await api.patch(`/api/orders/${order.json.data.id}/status`, {
+      token,
+      body: { status: 'PENDING' },
+    });
+
+    expect(status).toBe(422);
+  });
 });

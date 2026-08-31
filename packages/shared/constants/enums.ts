@@ -60,6 +60,10 @@ export const ORDER_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   PACKED: ['SHIPPED', 'CANCELLED'],
   SHIPPED: ['DELIVERED', 'CANCELLED', 'RETURNED'],
   DELIVERED: ['RETURNED'],
-  CANCELLED: [],
+  // Reopening a cancelled order is safe: cancelling never leaves stock in a
+  // half-restored state (see restoreStockForOrder), so going back to PENDING
+  // needs no compensating stock movement — a later re-confirm deducts stock
+  // through the normal path.
+  CANCELLED: ['PENDING'],
   RETURNED: [],
 };
