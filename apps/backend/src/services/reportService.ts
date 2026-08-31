@@ -8,6 +8,7 @@ import type {
 } from '@swoonrush/shared';
 import { pool } from '../config/db.js';
 import { expenseRepository } from '../repositories/expenseRepository.js';
+import { inventoryMovementRepository } from '../repositories/inventoryMovementRepository.js';
 import { productRepository } from '../repositories/productRepository.js';
 import { reportRepository } from '../repositories/reportRepository.js';
 import { mapInventoryListItem } from '../utils/mappers.js';
@@ -33,6 +34,11 @@ export const reportService = {
     const grossProfit = profit.grossProfit;
     const netProfit = grossProfit - expensesTotal;
 
+    const lowStockTotals = await inventoryMovementRepository.totalStockInByProduct(
+      pool,
+      lowStock.items.map((item) => item.id),
+    );
+
     return {
       revenue: sales.revenue,
       orders: sales.orders,
@@ -46,7 +52,7 @@ export const reportService = {
       topProducts,
       orderStatusDistribution: orderDist,
       paymentStatusDistribution: paymentDist,
-      lowStockProducts: lowStock.items.map(mapInventoryListItem),
+      lowStockProducts: lowStock.items.map((row) => mapInventoryListItem(row, lowStockTotals.get(row.id) ?? 0)),
     };
   },
 

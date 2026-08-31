@@ -253,6 +253,7 @@ export function mapInventoryCatalogItem(row: InventoryCatalogListRow): Inventory
     name: row.name,
     variantCount: row.variant_count,
     stockQuantity: row.stock_quantity,
+    totalStockIn: row.total_stock_in,
     stockStatus:
       row.stock_quantity <= 0 ? 'OUT_OF_STOCK' : row.low_stock_variant_count > 0 ? 'LOW' : 'IN_STOCK',
     status: row.status as ProductDetailDto['status'],
@@ -266,6 +267,7 @@ export function mapInventoryCatalogItem(row: InventoryCatalogListRow): Inventory
 
 export function mapInventoryListItem(
   row: ProductRow & { group_name?: string | null },
+  totalStockIn: number,
 ): InventoryListItemDto {
   return {
     id: row.id,
@@ -274,6 +276,7 @@ export function mapInventoryListItem(
     size: row.size,
     color: row.color,
     stockQuantity: row.stock_quantity,
+    totalStockIn,
     lowStockLimit: row.low_stock_limit,
     stockStatus: stockStatusFor(row.stock_quantity, row.low_stock_limit),
     status: row.status,

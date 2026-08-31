@@ -48,6 +48,21 @@ export const inventoryMovementRepository = {
     return rows[0]!;
   },
 
+  /** Lifetime units ever added to stock (OPENING_STOCK + STOCK_IN), keyed by product id.
+   *  Never nets against sales/damage/etc — see mappers.ts's InventoryListItemDto usage. */
+  async totalStockInByProduct(db: Queryable, productIds: string[]): Promise<Map<string, number>> {
+    if (productIds.length === 0) return new Map();
+
+    const { rows } = await db.query<{ product_id: string; total: string }>(
+      `SELECT product_id, COALESCE(SUM(quantity), 0) AS total
+       FROM inventory_movements
+       WHERE product_id = ANY($1) AND type IN ('OPENING_STOCK', 'STOCK_IN')
+       GROUP BY product_id`,
+      [productIds],
+    );
+    return new Map(rows.map((row) => [row.product_id, Number(row.total)]));
+  },
+
   async existsForProduct(db: Queryable, productId: string): Promise<boolean> {
     const { rows } = await db.query('SELECT 1 FROM inventory_movements WHERE product_id = $1 LIMIT 1', [
       productId,

@@ -83,3 +83,44 @@ describe('low-stock listing', () => {
     expect(json.data.items.some((p: { id: string }) => p.id === productId)).toBe(true);
   });
 });
+
+describe('total stock in', () => {
+  it('sums OPENING_STOCK and STOCK_IN, ignoring adjustments, for a standalone product', async () => {
+    await api.post('/api/inventory/stock-in', { token, body: { productId, quantity: 20, reason: 'Restock' } });
+    await api.post('/api/inventory/adjust', { token, body: { productId, quantity: -3, reason: 'Damaged' } });
+
+    const list = await api.get('/api/inventory', { token });
+    const row = list.json.data.items.find((p: { id: string }) => p.id === productId);
+    expect(row.totalStockIn).toBe(30); // 10 opening + 20 stock-in, -3 adjustment excluded
+
+    const catalog = await api.get('/api/inventory/catalog', { token });
+    const catalogRow = catalog.json.data.items.find((p: { id: string }) => p.id === productId);
+    expect(catalogRow.totalStockIn).toBe(30);
+  });
+
+  it('sums total stock in across every variant for a group row', async () => {
+    const category = await api.post('/api/categories', { token, body: { name: 'Pants' } });
+    const group = await api.post('/api/product-groups', {
+      token,
+      body: {
+        categoryId: category.json.data.id,
+        name: 'Cargo Pants',
+        purchasePrice: 500,
+        sellingPrice: 1299,
+        variants: [
+          { sku: 'PT-BLK-32', size: '32', color: 'Black', stockQuantity: 10 },
+          { sku: 'PT-KHK-34', size: '34', color: 'Khaki', stockQuantity: 5 },
+        ],
+      },
+    });
+    const [variantA] = group.json.data.variants;
+    await api.post('/api/inventory/stock-in', {
+      token,
+      body: { productId: variantA.id, quantity: 8, reason: 'Restock' },
+    });
+
+    const catalog = await api.get('/api/inventory/catalog', { token });
+    const groupRow = catalog.json.data.items.find((p: { id: string }) => p.id === group.json.data.id);
+    expect(groupRow.totalStockIn).toBe(23); // (10 + 5 opening) + 8 stock-in
+  });
+});

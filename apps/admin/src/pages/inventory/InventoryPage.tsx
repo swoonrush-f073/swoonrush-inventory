@@ -34,7 +34,7 @@ function GroupVariantRows({
   if (isPending) {
     return (
       <TableRow>
-        <TableCell colSpan={9}>
+        <TableCell colSpan={10}>
           <Skeleton className="h-8 w-full" />
         </TableCell>
       </TableRow>
@@ -50,6 +50,7 @@ function GroupVariantRows({
           <TableCell>{variant.size ?? '—'}</TableCell>
           <TableCell>{variant.color ?? '—'}</TableCell>
           <TableCell className="text-right tabular-nums">{variant.stockQuantity}</TableCell>
+          <TableCell className="text-right tabular-nums text-muted-foreground">{variant.totalStockIn}</TableCell>
           <TableCell className="text-right tabular-nums text-muted-foreground">
             {variant.lowStockLimit}
           </TableCell>
@@ -170,6 +171,7 @@ export function InventoryPage() {
                 <TableHead>Size</TableHead>
                 <TableHead>Color</TableHead>
                 <TableHead className="text-right">Current Stock</TableHead>
+                <TableHead className="text-right">Total Stock</TableHead>
                 <TableHead className="text-right">Low Stock Limit</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Last Updated</TableHead>
@@ -205,6 +207,9 @@ export function InventoryPage() {
                     <TableCell>{item.size ?? '—'}</TableCell>
                     <TableCell>{item.color ?? '—'}</TableCell>
                     <TableCell className="text-right tabular-nums">{item.stockQuantity}</TableCell>
+                    <TableCell className="text-right tabular-nums text-muted-foreground">
+                      {item.totalStockIn}
+                    </TableCell>
                     <TableCell className="text-right tabular-nums text-muted-foreground">
                       {item.lowStockLimit ?? '—'}
                     </TableCell>

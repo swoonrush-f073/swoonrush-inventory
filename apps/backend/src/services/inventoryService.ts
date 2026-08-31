@@ -27,7 +27,13 @@ export const inventoryService = {
       sortBy: 'name',
       sortDir: 'asc',
     });
-    return paginatedResult(items.map(mapInventoryListItem), filters.page, filters.limit, total);
+    const totals = await inventoryMovementRepository.totalStockInByProduct(pool, items.map((item) => item.id));
+    return paginatedResult(
+      items.map((row) => mapInventoryListItem(row, totals.get(row.id) ?? 0)),
+      filters.page,
+      filters.limit,
+      total,
+    );
   },
 
   async listCatalog(filters: {
@@ -45,7 +51,13 @@ export const inventoryService = {
     limit: number;
   }): Promise<PaginatedResult<InventoryListItemDto>> {
     const { items, total } = await productRepository.listLowStock(pool, pagination);
-    return paginatedResult(items.map(mapInventoryListItem), pagination.page, pagination.limit, total);
+    const totals = await inventoryMovementRepository.totalStockInByProduct(pool, items.map((item) => item.id));
+    return paginatedResult(
+      items.map((row) => mapInventoryListItem(row, totals.get(row.id) ?? 0)),
+      pagination.page,
+      pagination.limit,
+      total,
+    );
   },
 
   async movements(filters: MovementQuery): Promise<PaginatedResult<InventoryMovementDto>> {

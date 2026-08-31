@@ -133,6 +133,8 @@ export interface InventoryCatalogListRow {
   variant_count: number;
   low_stock_variant_count: number;
   low_stock_limit: number | null;
+  /** Lifetime units ever added to stock (OPENING_STOCK + STOCK_IN movements), never netted against sales/damage/etc. */
+  total_stock_in: number;
   updated_at: string;
 }
 
@@ -152,6 +154,11 @@ const INVENTORY_CATALOG_UNION = `
     COUNT(p.id)::int AS variant_count,
     COUNT(*) FILTER (WHERE p.stock_quantity <= p.low_stock_limit)::int AS low_stock_variant_count,
     NULL::int AS low_stock_limit,
+    (
+      SELECT COALESCE(SUM(im.quantity), 0)::int FROM inventory_movements im
+      JOIN products p2 ON p2.id = im.product_id
+      WHERE p2.group_id = pg.id AND im.type IN ('OPENING_STOCK', 'STOCK_IN')
+    ) AS total_stock_in,
     COALESCE(MAX(p.updated_at), pg.updated_at) AS updated_at
   FROM product_groups pg
   LEFT JOIN products p ON p.group_id = pg.id
@@ -167,6 +174,10 @@ const INVENTORY_CATALOG_UNION = `
     1 AS variant_count,
     (CASE WHEN p.stock_quantity <= p.low_stock_limit THEN 1 ELSE 0 END) AS low_stock_variant_count,
     p.low_stock_limit,
+    (
+      SELECT COALESCE(SUM(im.quantity), 0)::int FROM inventory_movements im
+      WHERE im.product_id = p.id AND im.type IN ('OPENING_STOCK', 'STOCK_IN')
+    ) AS total_stock_in,
     p.updated_at
   FROM products p
   WHERE p.group_id IS NULL

@@ -80,6 +80,8 @@ export interface InventoryListItemDto {
   size: string | null;
   color: string | null;
   stockQuantity: number;
+  /** Lifetime units ever added to stock (OPENING_STOCK + STOCK_IN movements), never netted against sales/damage/etc. */
+  totalStockIn: number;
   lowStockLimit: number;
   stockStatus: StockStatus;
   status: ProductStatus;
@@ -101,6 +103,8 @@ export interface InventoryCatalogItemDto {
   name: string;
   variantCount: number;
   stockQuantity: number;
+  /** Lifetime units ever added to stock (OPENING_STOCK + STOCK_IN movements), never netted against sales/damage/etc. */
+  totalStockIn: number;
   stockStatus: StockStatus;
   status: ProductStatus;
   updatedAt: string;
