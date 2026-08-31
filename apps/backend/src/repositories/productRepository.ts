@@ -133,7 +133,6 @@ export interface InventoryCatalogListRow {
   variant_count: number;
   low_stock_variant_count: number;
   low_stock_limit: number | null;
-  /** Lifetime units ever added to stock (OPENING_STOCK + STOCK_IN movements), never netted against sales/damage/etc. */
   total_stock_in: number;
   updated_at: string;
 }

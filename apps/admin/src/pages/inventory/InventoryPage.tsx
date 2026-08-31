@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { Boxes, ChevronDown, ChevronRight, History, Search } from 'lucide-react';
+import { Boxes, ChevronDown, ChevronRight, History, IndianRupee, Search } from 'lucide-react';
 import type { InventoryCatalogItemDto } from '@swoonrush/shared';
 import { PageHeader } from '@/components/PageHeader';
 import { EmptyState } from '@/components/EmptyState';
@@ -8,15 +8,40 @@ import { ErrorState } from '@/components/ErrorState';
 import { Pagination } from '@/components/Pagination';
 import { ProductStatusBadge, StockStatusBadge } from '@/components/StatusBadge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useGroupVariantsInventory, useInventoryCatalog } from '@/api/inventory';
-import { formatDateTime } from '@/lib/utils';
+import { useInventoryReport } from '@/api/reports';
+import { formatCurrency, formatDateTime } from '@/lib/utils';
 import { AdjustStockDialog, StockInDialog } from './StockActionDialogs';
 
 const ALL = '__all__';
+
+/** Total value of on-hand stock (units × purchase price) across every ACTIVE
+ *  product — a global snapshot, not affected by this page's search/filters,
+ *  matching how the same figure is presented on the Inventory Report page. */
+function TotalInventoryValueCard() {
+  const { data, isPending } = useInventoryReport();
+
+  return (
+    <Card className="mb-4 max-w-xs">
+      <CardContent className="flex items-center justify-between p-4">
+        <div>
+          <p className="text-xs text-muted-foreground">Total Inventory Value</p>
+          <p className="mt-1 text-xl font-semibold tabular-nums">
+            {isPending || !data ? <Skeleton className="h-6 w-24" /> : formatCurrency(data.inventoryValue)}
+          </p>
+        </div>
+        <div className="rounded-full bg-primary/10 p-2 text-primary">
+          <IndianRupee className="h-4 w-4" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 type StockTarget = { id: string; sku: string; name: string; stockQuantity: number };
 
@@ -116,6 +141,8 @@ export function InventoryPage() {
           </Button>
         }
       />
+
+      <TotalInventoryValueCard />
 
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <div className="relative w-full max-w-xs">
