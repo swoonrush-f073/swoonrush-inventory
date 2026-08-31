@@ -86,11 +86,13 @@ export function EditOrderItemDialog({ orderId, item, open, onOpenChange }: EditO
               control={control}
               name="productId"
               render={({ field }) => (
-                <ProductCombobox
-                  products={products?.items ?? []}
-                  value={field.value}
-                  onChange={(id) => handleProductChange(id, field.onChange)}
-                />
+                <div className="flex">
+                  <ProductCombobox
+                    products={products?.items ?? []}
+                    value={field.value}
+                    onChange={(id) => handleProductChange(id, field.onChange)}
+                  />
+                </div>
               )}
             />
             {errors.productId && <p className="text-xs text-destructive">{errors.productId.message}</p>}
