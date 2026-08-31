@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Pencil } from 'lucide-react';
-import { ORDER_STATUS_TRANSITIONS, type OrderStatus, type PaymentStatus } from '@swoonrush/shared';
+import { ORDER_STATUS_TRANSITIONS, type OrderItemDto, type OrderStatus, type PaymentStatus } from '@swoonrush/shared';
 import { PageHeader } from '@/components/PageHeader';
 import { ErrorState } from '@/components/ErrorState';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
@@ -15,6 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useOrder, useUpdateOrderStatus, useUpdatePaymentStatus } from '@/api/orders';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
 import { EditOrderDialog } from './EditOrderDialog';
+import { EditOrderItemDialog } from './EditOrderItemDialog';
 import { InvoiceActions } from './InvoiceActions';
 import { OrderTimeline } from './OrderTimeline';
 
@@ -27,6 +28,7 @@ export function OrderDetailPage() {
   const updatePayment = useUpdatePaymentStatus(id ?? '');
   const [pendingTransition, setPendingTransition] = React.useState<OrderStatus | null>(null);
   const [editOpen, setEditOpen] = React.useState(false);
+  const [editingItem, setEditingItem] = React.useState<OrderItemDto | null>(null);
 
   async function handleStatusChange(status: OrderStatus) {
     try {
@@ -116,6 +118,7 @@ export function OrderDetailPage() {
                     <TableHead className="text-right">Price</TableHead>
                     <TableHead className="text-right">Discount</TableHead>
                     <TableHead className="text-right">Total</TableHead>
+                    <TableHead className="w-9" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -129,6 +132,16 @@ export function OrderDetailPage() {
                       <TableCell className="text-right tabular-nums">{formatCurrency(item.unitPrice)}</TableCell>
                       <TableCell className="text-right tabular-nums">{formatCurrency(item.discount)}</TableCell>
                       <TableCell className="text-right tabular-nums">{formatCurrency(item.total)}</TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label={`Edit ${item.productName}`}
+                          onClick={() => setEditingItem(item)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -226,6 +239,15 @@ export function OrderDetailPage() {
       </div>
 
       <EditOrderDialog order={order} open={editOpen} onOpenChange={setEditOpen} />
+
+      {editingItem && (
+        <EditOrderItemDialog
+          orderId={order.id}
+          item={editingItem}
+          open={Boolean(editingItem)}
+          onOpenChange={(open) => !open && setEditingItem(null)}
+        />
+      )}
 
       <ConfirmDialog
         open={Boolean(pendingTransition)}

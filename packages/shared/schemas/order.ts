@@ -33,6 +33,12 @@ export const createOrderSchema = z
   });
 export type CreateOrderInput = z.infer<typeof createOrderSchema>;
 
+/** Replaces one existing line item's product/quantity/price/discount.
+ *  Shares its shape with orderItemInputSchema since it's the same data,
+ *  just applied to an existing item instead of a new order. */
+export const updateOrderItemSchema = orderItemInputSchema;
+export type UpdateOrderItemInput = OrderItemInput;
+
 export const updateOrderSchema = z.object({
   customerId: z.string().uuid().optional().nullable(),
   discount: z.coerce.number().min(0).optional(),

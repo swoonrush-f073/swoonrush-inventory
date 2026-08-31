@@ -2,6 +2,7 @@ import type { Context } from 'hono';
 import {
   createOrderSchema,
   orderQuerySchema,
+  updateOrderItemSchema,
   updateOrderSchema,
   updateOrderStatusSchema,
   updatePaymentStatusSchema,
@@ -32,6 +33,13 @@ export const orderController = {
   async update(c: Context<AppEnv>) {
     const input = updateOrderSchema.parse(await c.req.json());
     const order = await orderService.update(pathParam(c, 'id'), input);
+    return ok(c, order);
+  },
+
+  async updateItem(c: Context<AppEnv>) {
+    const input = updateOrderItemSchema.parse(await c.req.json());
+    const user = c.get('user');
+    const order = await orderService.updateItem(pathParam(c, 'id'), pathParam(c, 'itemId'), input, user.id);
     return ok(c, order);
   },
 

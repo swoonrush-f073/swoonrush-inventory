@@ -8,6 +8,7 @@ import type {
   PaginatedResult,
   PaymentStatus,
   UpdateOrderInput,
+  UpdateOrderItemInput,
 } from '@swoonrush/shared';
 import { apiClient } from './client';
 
@@ -56,6 +57,15 @@ export function useUpdateOrder(id: string) {
   const invalidate = useInvalidateOrders(id);
   return useMutation({
     mutationFn: (input: UpdateOrderInput) => apiClient.patch<OrderDetailDto>(`/orders/${id}`, input),
+    onSuccess: invalidate,
+  });
+}
+
+export function useUpdateOrderItem(orderId: string) {
+  const invalidate = useInvalidateOrders(orderId);
+  return useMutation({
+    mutationFn: ({ itemId, ...input }: UpdateOrderItemInput & { itemId: string }) =>
+      apiClient.patch<OrderDetailDto>(`/orders/${orderId}/items/${itemId}`, input),
     onSuccess: invalidate,
   });
 }

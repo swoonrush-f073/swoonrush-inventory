@@ -8,6 +8,7 @@ import type {
   OrderStatus,
   PaymentStatus,
   UpdateOrderInput,
+  UpdateOrderItemInput,
 } from '@swoonrush/shared';
 import { ORDER_STATUS_TRANSITIONS, STOCK_DEDUCTED_STATUSES } from '@swoonrush/shared';
 import { paginatedResult, type PaginatedResult } from './helpers/paginatedResult.js';
@@ -109,6 +110,84 @@ async function restoreStockForOrder(
   }
 }
 
+/**
+ * Reconciles stock for an in-place line-item edit on an order whose stock
+ * was already deducted. Same product: adjusts by the quantity delta only.
+ * Different product: restores the old product's quantity and deducts the
+ * new one, locking both products in a stable (id-sorted) order so this can
+ * never deadlock against a concurrent edit that swaps the same two products
+ * in the opposite direction.
+ */
+async function reconcileStockForItemChange(
+  client: Queryable,
+  order: OrderRow,
+  existingItem: OrderItemRow,
+  input: UpdateOrderItemInput,
+  userId: string,
+): Promise<void> {
+  if (existingItem.product_id === input.productId) {
+    const delta = input.quantity - existingItem.quantity;
+    if (delta === 0) return;
+
+    const product = await productRepository.lockForUpdate(client, input.productId);
+    if (!product) throw ApiError.notFound('Product');
+    if (delta > 0 && product.stock_quantity < delta) {
+      throw ApiError.validation(
+        `Insufficient stock for ${product.sku} (have ${product.stock_quantity}, need ${delta} more)`,
+      );
+    }
+
+    await productRepository.setStockQuantity(client, product.id, product.stock_quantity - delta);
+    await inventoryMovementRepository.create(client, {
+      productId: product.id,
+      type: 'ADJUSTMENT',
+      quantity: -delta,
+      referenceType: 'ORDER',
+      referenceId: order.id,
+      reason: `Order ${order.order_number} item quantity changed (${existingItem.quantity} -> ${input.quantity})`,
+      createdBy: userId,
+    });
+    return;
+  }
+
+  const sortedIds = [existingItem.product_id, input.productId].sort((a, b) => a.localeCompare(b));
+  const firstId = sortedIds[0]!;
+  const secondId = sortedIds[1]!;
+  const firstLocked = await productRepository.lockForUpdate(client, firstId);
+  const secondLocked = await productRepository.lockForUpdate(client, secondId);
+  const oldProduct = firstId === existingItem.product_id ? firstLocked : secondLocked;
+  const newProduct = firstId === input.productId ? firstLocked : secondLocked;
+  if (!oldProduct || !newProduct) throw ApiError.notFound('Product');
+
+  if (newProduct.stock_quantity < input.quantity) {
+    throw ApiError.validation(
+      `Insufficient stock for ${newProduct.sku} (have ${newProduct.stock_quantity}, need ${input.quantity})`,
+    );
+  }
+
+  await productRepository.setStockQuantity(client, oldProduct.id, oldProduct.stock_quantity + existingItem.quantity);
+  await inventoryMovementRepository.create(client, {
+    productId: oldProduct.id,
+    type: 'ADJUSTMENT',
+    quantity: existingItem.quantity,
+    referenceType: 'ORDER',
+    referenceId: order.id,
+    reason: `Order ${order.order_number} item changed from ${oldProduct.sku} to ${newProduct.sku}`,
+    createdBy: userId,
+  });
+
+  await productRepository.setStockQuantity(client, newProduct.id, newProduct.stock_quantity - input.quantity);
+  await inventoryMovementRepository.create(client, {
+    productId: newProduct.id,
+    type: 'ADJUSTMENT',
+    quantity: -input.quantity,
+    referenceType: 'ORDER',
+    referenceId: order.id,
+    reason: `Order ${order.order_number} item changed from ${oldProduct.sku} to ${newProduct.sku}`,
+    createdBy: userId,
+  });
+}
+
 export const orderService = {
   async list(filters: OrderQuery): Promise<PaginatedResult<OrderListItemDto>> {
     const { items, total } = await orderRepository.list(pool, filters);
@@ -199,6 +278,60 @@ export const orderService = {
     });
 
     return loadDetail(id);
+  },
+
+  /**
+   * Replaces one existing line item's product/quantity/price/discount.
+   * If the order's current status has already deducted stock
+   * (`STOCK_DEDUCTED_STATUSES`), reconciles stock for the change — restoring
+   * whatever the old product/quantity had taken and deducting the new
+   * one, failing the whole change if the new product doesn't have enough.
+   * Orders still in PENDING (nothing deducted yet) skip stock entirely.
+   */
+  async updateItem(
+    orderId: string,
+    itemId: string,
+    input: UpdateOrderItemInput,
+    userId: string,
+  ): Promise<OrderDetailDto> {
+    await withTransaction(async (client) => {
+      const order = await lockOrderOrThrow(client, orderId);
+      const items = await orderRepository.getItems(client, orderId);
+      const existingItem = items.find((item) => item.id === itemId);
+      if (!existingItem) throw ApiError.notFound('Order item');
+
+      const newProduct = await productRepository.findById(client, input.productId);
+      if (!newProduct) throw ApiError.notFound('Product', 'PRODUCT_NOT_FOUND');
+
+      if (STOCK_DEDUCTED_STATUSES.includes(order.order_status)) {
+        await reconcileStockForItemChange(client, order, existingItem, input, userId);
+      }
+
+      const unitPrice = input.unitPrice ?? Number(newProduct.selling_price);
+      const discount = input.discount ?? 0;
+      const total = unitPrice * input.quantity - discount;
+
+      await orderRepository.updateItem(client, itemId, {
+        productId: newProduct.id,
+        productName: newProduct.name,
+        sku: newProduct.sku,
+        quantity: input.quantity,
+        unitPrice,
+        discount,
+        total,
+        costPrice: Number(newProduct.purchase_price),
+      });
+
+      const subtotal = items
+        .filter((item) => item.id !== itemId)
+        .reduce((sum, item) => sum + Number(item.total), 0) + total;
+      const orderTotal =
+        subtotal - Number(order.discount) + Number(order.shipping_fee) + Number(order.tax) + Number(order.stitching_charge);
+
+      await orderRepository.updateFields(client, orderId, { subtotal, total: orderTotal });
+    });
+
+    return loadDetail(orderId);
   },
 
   async updateStatus(id: string, nextStatus: OrderStatus, userId: string): Promise<OrderDetailDto> {

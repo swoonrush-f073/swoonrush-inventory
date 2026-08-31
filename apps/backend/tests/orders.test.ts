@@ -199,3 +199,98 @@ describe('order cancellation', () => {
     expect(status).toBe(422);
   });
 });
+
+describe('order item editing', () => {
+  async function createSecondProduct(stockQuantity = 5) {
+    const category = await api.post('/api/categories', { token, body: { name: 'Kurtas' } });
+    const product = await api.post('/api/products', {
+      token,
+      body: {
+        categoryId: category.json.data.id,
+        sku: 'SW-OT-05-S',
+        name: 'Khun Thee Oversized T-Shirt',
+        purchasePrice: 350,
+        sellingPrice: 899,
+        stockQuantity,
+        lowStockLimit: 5,
+      },
+    });
+    return product.json.data.id as string;
+  }
+
+  it('swaps a PENDING order item to a different product with no stock side effects', async () => {
+    const secondProductId = await createSecondProduct();
+    const order = await api.post('/api/orders', { token, body: { items: [{ productId, quantity: 2 }] } });
+    const itemId = order.json.data.items[0].id;
+
+    const { status, json } = await api.patch(`/api/orders/${order.json.data.id}/items/${itemId}`, {
+      token,
+      body: { productId: secondProductId, quantity: 2 },
+    });
+
+    expect(status).toBe(200);
+    expect(json.data.items[0].productId).toBe(secondProductId);
+    expect(json.data.items[0].unitPrice).toBe(899);
+    expect(json.data.subtotal).toBe(1798); // 2 * 899
+    expect(json.data.total).toBe(1798);
+
+    const original = await api.get(`/api/products/${productId}`, { token });
+    const swapped = await api.get(`/api/products/${secondProductId}`, { token });
+    expect(original.json.data.stockQuantity).toBe(10); // untouched, nothing was deducted yet
+    expect(swapped.json.data.stockQuantity).toBe(5); // untouched
+  });
+
+  it('reconciles stock when swapping a product on a CONFIRMED order', async () => {
+    const secondProductId = await createSecondProduct();
+    const order = await api.post('/api/orders', { token, body: { items: [{ productId, quantity: 3 }] } });
+    const itemId = order.json.data.items[0].id;
+    await api.patch(`/api/orders/${order.json.data.id}/status`, { token, body: { status: 'CONFIRMED' } });
+
+    const { status } = await api.patch(`/api/orders/${order.json.data.id}/items/${itemId}`, {
+      token,
+      body: { productId: secondProductId, quantity: 3 },
+    });
+
+    expect(status).toBe(200);
+
+    const original = await api.get(`/api/products/${productId}`, { token });
+    const swapped = await api.get(`/api/products/${secondProductId}`, { token });
+    expect(original.json.data.stockQuantity).toBe(10); // restored (3 deducted, 3 restored)
+    expect(swapped.json.data.stockQuantity).toBe(2); // 5 - 3 deducted
+  });
+
+  it('rejects a product swap on a CONFIRMED order when the new product lacks stock', async () => {
+    const secondProductId = await createSecondProduct(1);
+    const order = await api.post('/api/orders', { token, body: { items: [{ productId, quantity: 3 }] } });
+    const itemId = order.json.data.items[0].id;
+    await api.patch(`/api/orders/${order.json.data.id}/status`, { token, body: { status: 'CONFIRMED' } });
+
+    const { status } = await api.patch(`/api/orders/${order.json.data.id}/items/${itemId}`, {
+      token,
+      body: { productId: secondProductId, quantity: 3 },
+    });
+
+    expect(status).toBe(422);
+
+    const original = await api.get(`/api/products/${productId}`, { token });
+    const swapped = await api.get(`/api/products/${secondProductId}`, { token });
+    expect(original.json.data.stockQuantity).toBe(7); // unchanged — the whole edit was rejected
+    expect(swapped.json.data.stockQuantity).toBe(1); // unchanged
+  });
+
+  it('adjusts stock by the delta when only quantity changes on a CONFIRMED order', async () => {
+    const order = await api.post('/api/orders', { token, body: { items: [{ productId, quantity: 3 }] } });
+    const itemId = order.json.data.items[0].id;
+    await api.patch(`/api/orders/${order.json.data.id}/status`, { token, body: { status: 'CONFIRMED' } });
+
+    const { status } = await api.patch(`/api/orders/${order.json.data.id}/items/${itemId}`, {
+      token,
+      body: { productId, quantity: 5 },
+    });
+
+    expect(status).toBe(200);
+
+    const product = await api.get(`/api/products/${productId}`, { token });
+    expect(product.json.data.stockQuantity).toBe(5); // 10 - 5, not 10 - 3 - 5
+  });
+});

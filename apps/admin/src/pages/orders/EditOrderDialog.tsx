@@ -163,8 +163,8 @@ export function EditOrderDialog({ order, open, onOpenChange }: EditOrderDialogPr
             </div>
 
             <p className="text-xs text-muted-foreground">
-              Products and quantities can't be changed after an order is created — cancel and
-              re-create the order if an item was added in error.
+              To change a product or quantity on this order, use the edit icon on that line item
+              in the Products table instead.
             </p>
 
             <DialogFooter>

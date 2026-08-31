@@ -11,5 +11,6 @@ orderRoutes.get('/', orderController.list);
 orderRoutes.get('/:id', orderController.getById);
 orderRoutes.post('/', orderController.create);
 orderRoutes.patch('/:id', orderController.update);
+orderRoutes.patch('/:id/items/:itemId', orderController.updateItem);
 orderRoutes.patch('/:id/status', orderController.updateStatus);
 orderRoutes.patch('/:id/payment', requireRole('OWNER', 'ADMIN'), orderController.updatePayment);

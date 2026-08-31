@@ -111,6 +111,39 @@ export const orderRepository = {
     return rows;
   },
 
+  async updateItem(
+    db: Queryable,
+    itemId: string,
+    input: {
+      productId: string;
+      productName: string;
+      sku: string;
+      quantity: number;
+      unitPrice: number;
+      discount: number;
+      total: number;
+      costPrice: number;
+    },
+  ): Promise<void> {
+    await db.query(
+      `UPDATE order_items
+       SET product_id = $1, product_name = $2, sku = $3, quantity = $4,
+           unit_price = $5, discount = $6, total = $7, cost_price = $8
+       WHERE id = $9`,
+      [
+        input.productId,
+        input.productName,
+        input.sku,
+        input.quantity,
+        input.unitPrice,
+        input.discount,
+        input.total,
+        input.costPrice,
+        itemId,
+      ],
+    );
+  },
+
   async findById(db: Queryable, id: string): Promise<OrderRow | null> {
     const { rows } = await db.query<OrderRow>('SELECT * FROM orders WHERE id = $1', [id]);
     return rows[0] ?? null;
@@ -182,6 +215,7 @@ export const orderRepository = {
     id: string,
     input: Partial<{
       customerId: string | null;
+      subtotal: number;
       discount: number;
       shippingFee: number;
       tax: number;
@@ -195,6 +229,7 @@ export const orderRepository = {
 
     for (const [key, column] of [
       ['customerId', 'customer_id'],
+      ['subtotal', 'subtotal'],
       ['discount', 'discount'],
       ['shippingFee', 'shipping_fee'],
       ['tax', 'tax'],
