@@ -93,6 +93,14 @@ export const reportRepository = {
     return { productRevenue, productCost, grossProfit: productRevenue - productCost };
   },
 
+  /**
+   * One row per calendar day across the range (or, when the range is open-
+   * ended, across the earliest-to-latest matching order), zero-filling days
+   * with no orders. Without this, days with no sales are simply absent from
+   * the result — a line chart plotted against a categorical axis then spaces
+   * every returned point equally regardless of the actual gap between their
+   * dates, visually implying an even cadence that isn't real.
+   */
   async salesByDay(db: Queryable, range: DateRange): Promise<SalesByDayPoint[]> {
     const { rows } = await db.query<{
       date: string;
@@ -100,27 +108,42 @@ export const reportRepository = {
       units: string | null;
       revenue: string;
     }>(
-      `SELECT
-         daily.date,
-         daily.orders,
-         daily.revenue,
-         COALESCE(item_daily.units, 0) AS units
-       FROM (
-         SELECT DATE(order_date)::text AS date, COUNT(*) AS orders, SUM(total) AS revenue
+      `WITH bounds AS (
+         SELECT
+           COALESCE($1::date, MIN(DATE(order_date))) AS start_date,
+           COALESCE($2::date, MAX(DATE(order_date))) AS end_date
+         FROM orders
+         WHERE ${ACTIVE_ORDER_STATUSES_SQL} AND ${DATE_RANGE_SQL}
+       ),
+       days AS (
+         SELECT generate_series(bounds.start_date, bounds.end_date, INTERVAL '1 day')::date AS date
+         FROM bounds
+         WHERE bounds.start_date IS NOT NULL
+       ),
+       daily AS (
+         SELECT DATE(order_date) AS date, COUNT(*) AS orders, SUM(total) AS revenue
          FROM orders
          WHERE ${ACTIVE_ORDER_STATUSES_SQL} AND ${DATE_RANGE_SQL}
          GROUP BY DATE(order_date)
-       ) daily
-       LEFT JOIN (
-         SELECT DATE(o2.order_date)::text AS date, SUM(oi.quantity) AS units
+       ),
+       item_daily AS (
+         SELECT DATE(o2.order_date) AS date, SUM(oi.quantity) AS units
          FROM order_items oi
          JOIN orders o2 ON o2.id = oi.order_id
          WHERE o2.${ACTIVE_ORDER_STATUSES_SQL} AND
            ($1::date IS NULL OR o2.order_date >= $1::date) AND
            ($2::date IS NULL OR o2.order_date < ($2::date + INTERVAL '1 day'))
          GROUP BY DATE(o2.order_date)
-       ) item_daily ON item_daily.date = daily.date
-       ORDER BY daily.date ASC`,
+       )
+       SELECT
+         days.date::text AS date,
+         COALESCE(daily.orders, 0) AS orders,
+         COALESCE(daily.revenue, 0) AS revenue,
+         COALESCE(item_daily.units, 0) AS units
+       FROM days
+       LEFT JOIN daily ON daily.date = days.date
+       LEFT JOIN item_daily ON item_daily.date = days.date
+       ORDER BY days.date ASC`,
       rangeParams(range),
     );
     return rows.map((r) => ({

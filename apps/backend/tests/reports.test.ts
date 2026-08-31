@@ -66,4 +66,27 @@ describe('sales report', () => {
     expect(json.data.revenue).toBe(2 * 799 + 150); // order total includes the stitching charge
     expect(json.data.stitchingRevenue).toBe(150);
   });
+
+  it('zero-fills salesByDay for days with no orders inside the range', async () => {
+    const first = await api.post('/api/orders', { token, body: { items: [{ productId, quantity: 1 }] } });
+    await api.patch(`/api/orders/${first.json.data.id}/status`, { token, body: { status: 'CONFIRMED' } });
+    await api.patch(`/api/orders/${first.json.data.id}`, { token, body: { orderDate: '2026-01-01' } });
+
+    const second = await api.post('/api/orders', { token, body: { items: [{ productId, quantity: 3 }] } });
+    await api.patch(`/api/orders/${second.json.data.id}/status`, { token, body: { status: 'CONFIRMED' } });
+    await api.patch(`/api/orders/${second.json.data.id}`, { token, body: { orderDate: '2026-01-04' } });
+
+    const { json } = await api.get('/api/reports/sales?from=2026-01-01&to=2026-01-04', { token });
+
+    expect(json.data.salesByDay.map((d: { date: string }) => d.date)).toEqual([
+      '2026-01-01',
+      '2026-01-02',
+      '2026-01-03',
+      '2026-01-04',
+    ]);
+    expect(json.data.salesByDay[0]).toMatchObject({ orders: 1, revenue: 799 });
+    expect(json.data.salesByDay[1]).toMatchObject({ orders: 0, revenue: 0, units: 0 });
+    expect(json.data.salesByDay[2]).toMatchObject({ orders: 0, revenue: 0, units: 0 });
+    expect(json.data.salesByDay[3]).toMatchObject({ orders: 1, revenue: 3 * 799 });
+  });
 });
