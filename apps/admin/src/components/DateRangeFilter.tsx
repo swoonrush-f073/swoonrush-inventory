@@ -7,7 +7,7 @@ export interface DateRange {
   to?: string;
 }
 
-type Preset = 'today' | 'yesterday' | 'last7' | 'thisMonth' | 'lastMonth' | 'custom';
+type Preset = 'today' | 'yesterday' | 'last7' | 'thisMonth' | 'lastMonth' | 'lastYear' | 'allTime' | 'custom';
 
 function toISODate(date: Date): string {
   return date.toISOString().slice(0, 10);
@@ -40,6 +40,12 @@ function rangeForPreset(preset: Preset): DateRange {
       const end = new Date(now.getFullYear(), now.getMonth(), 0);
       return { from: toISODate(start), to: toISODate(end) };
     }
+    case 'lastYear': {
+      const start = new Date(now.getFullYear() - 1, 0, 1);
+      const end = new Date(now.getFullYear() - 1, 11, 31);
+      return { from: toISODate(start), to: toISODate(end) };
+    }
+    case 'allTime':
     case 'custom':
       return {};
   }
@@ -70,6 +76,8 @@ export function DateRangeFilter({ value, onChange }: DateRangeFilterProps) {
           <SelectItem value="last7">Last 7 Days</SelectItem>
           <SelectItem value="thisMonth">This Month</SelectItem>
           <SelectItem value="lastMonth">Last Month</SelectItem>
+          <SelectItem value="lastYear">Last Year</SelectItem>
+          <SelectItem value="allTime">All Time</SelectItem>
           <SelectItem value="custom">Custom</SelectItem>
         </SelectContent>
       </Select>
