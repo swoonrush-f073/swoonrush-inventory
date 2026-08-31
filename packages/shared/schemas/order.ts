@@ -41,6 +41,9 @@ export type UpdateOrderItemInput = OrderItemInput;
 
 export const updateOrderSchema = z.object({
   customerId: z.string().uuid().optional().nullable(),
+  /** Date-only (YYYY-MM-DD) — corrects which day the order is recorded
+   *  against; time-of-day isn't editable and resets to midnight. */
+  orderDate: z.string().date().optional(),
   discount: z.coerce.number().min(0).optional(),
   shippingFee: z.coerce.number().min(0).optional(),
   tax: z.coerce.number().min(0).optional(),

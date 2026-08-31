@@ -105,13 +105,27 @@ describe('OrderDetailPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /^edit$/i }));
     expect(screen.getByRole('heading', { name: /edit order ord-1001/i })).toBeInTheDocument();
 
+    expect(screen.getByLabelText(/order date/i)).toHaveValue('2026-01-01');
+
     fireEvent.change(screen.getByLabelText(/^discount$/i), { target: { value: '50' } });
     fireEvent.click(screen.getByRole('button', { name: /save changes/i }));
 
     await waitFor(() =>
       expect(updateOrder).toHaveBeenCalledWith(
-        expect.objectContaining({ discount: 50, shippingFee: 0, tax: 0, stitchingCharge: 0 }),
+        expect.objectContaining({ discount: 50, shippingFee: 0, tax: 0, stitchingCharge: 0, orderDate: '2026-01-01' }),
       ),
+    );
+  });
+
+  it('lets the order date be corrected', async () => {
+    renderWithProviders(<OrderDetailPage />, { route: '/orders/order-1', path: '/orders/:id' });
+
+    fireEvent.click(screen.getByRole('button', { name: /^edit$/i }));
+    fireEvent.change(screen.getByLabelText(/order date/i), { target: { value: '2025-12-25' } });
+    fireEvent.click(screen.getByRole('button', { name: /save changes/i }));
+
+    await waitFor(() =>
+      expect(updateOrder).toHaveBeenCalledWith(expect.objectContaining({ orderDate: '2025-12-25' })),
     );
   });
 

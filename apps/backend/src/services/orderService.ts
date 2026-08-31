@@ -269,6 +269,7 @@ export const orderService = {
 
     await orderRepository.updateFields(pool, id, {
       ...(input.customerId !== undefined ? { customerId: input.customerId } : {}),
+      ...(input.orderDate !== undefined ? { orderDate: input.orderDate } : {}),
       ...(input.discount !== undefined ? { discount: input.discount } : {}),
       ...(input.shippingFee !== undefined ? { shippingFee: input.shippingFee } : {}),
       ...(input.tax !== undefined ? { tax: input.tax } : {}),

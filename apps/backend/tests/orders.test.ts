@@ -82,6 +82,31 @@ describe('order creation', () => {
   });
 });
 
+describe('order editing', () => {
+  it('lets the order date be corrected', async () => {
+    const order = await api.post('/api/orders', { token, body: { items: [{ productId, quantity: 1 }] } });
+
+    const { status, json } = await api.patch(`/api/orders/${order.json.data.id}`, {
+      token,
+      body: { orderDate: '2025-12-25' },
+    });
+
+    expect(status).toBe(200);
+    expect(json.data.orderDate.slice(0, 10)).toBe('2025-12-25');
+  });
+
+  it('rejects a malformed order date', async () => {
+    const order = await api.post('/api/orders', { token, body: { items: [{ productId, quantity: 1 }] } });
+
+    const { status } = await api.patch(`/api/orders/${order.json.data.id}`, {
+      token,
+      body: { orderDate: '25-12-2025' },
+    });
+
+    expect(status).toBe(422);
+  });
+});
+
 describe('order confirmation', () => {
   it('deducts stock and records a SALE movement referencing the order', async () => {
     const order = await api.post('/api/orders', { token, body: { items: [{ productId, quantity: 3 }] } });

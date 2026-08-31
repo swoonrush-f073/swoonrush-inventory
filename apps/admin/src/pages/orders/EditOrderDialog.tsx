@@ -42,6 +42,7 @@ export function EditOrderDialog({ order, open, onOpenChange }: EditOrderDialogPr
     resolver: zodResolver(updateOrderSchema),
     defaultValues: {
       customerId: order.customer?.id ?? null,
+      orderDate: order.orderDate.slice(0, 10),
       discount: order.discount,
       shippingFee: order.shippingFee,
       tax: order.tax,
@@ -56,6 +57,7 @@ export function EditOrderDialog({ order, open, onOpenChange }: EditOrderDialogPr
     if (open) {
       reset({
         customerId: order.customer?.id ?? null,
+        orderDate: order.orderDate.slice(0, 10),
         discount: order.discount,
         shippingFee: order.shippingFee,
         tax: order.tax,
@@ -106,6 +108,16 @@ export function EditOrderDialog({ order, open, onOpenChange }: EditOrderDialogPr
                   />
                 )}
               />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="edit-orderDate">Order date</Label>
+              <Input id="edit-orderDate" type="date" {...register('orderDate')} />
+              {errors.orderDate ? (
+                <p className="text-xs text-destructive">{errors.orderDate.message}</p>
+              ) : (
+                <p className="text-xs text-muted-foreground">Changing this resets the order's time to midnight.</p>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-3">

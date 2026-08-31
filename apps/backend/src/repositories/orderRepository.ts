@@ -215,6 +215,7 @@ export const orderRepository = {
     id: string,
     input: Partial<{
       customerId: string | null;
+      orderDate: string;
       subtotal: number;
       discount: number;
       shippingFee: number;
@@ -229,6 +230,7 @@ export const orderRepository = {
 
     for (const [key, column] of [
       ['customerId', 'customer_id'],
+      ['orderDate', 'order_date'],
       ['subtotal', 'subtotal'],
       ['discount', 'discount'],
       ['shippingFee', 'shipping_fee'],
